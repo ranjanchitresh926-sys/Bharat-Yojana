@@ -75,7 +75,7 @@ export default function GovFooter() {
       {/* Bottom Bar */}
       <div className="bg-[#4a4a4a] text-center py-3 px-4">
         <p className="text-orange-300 text-xs font-bold tracking-wide">Last update on August 2026</p>
-        <p className="text-gray-300 text-xs mt-1">The original text is in English. Translation into other languages is powered by the Bhashini service.</p>
+        <p className="text-gray-300 text-xs mt-1">Available in 6 Indian languages via a curated translation dictionary.</p>
       </div>
     </footer>
   );

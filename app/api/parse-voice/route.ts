@@ -1,11 +1,52 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleGenAI } from '@google/genai';
+import { z } from 'zod';
 import { CitizenProfile } from '../../../types/scheme';
 
 // Initialize the official Google Gen AI SDK client using your environment variable
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
+// Mirrors CitizenProfile — validated so a malformed or unexpected model
+// response fails cleanly instead of crashing the route or silently
+// corrupting the citizen's profile with garbage values.
+const citizenProfileSchema = z.object({
+  age: z.number().min(0).max(120),
+  annualIncome: z.number().min(0),
+  casteCategory: z.enum(['General', 'OBC', 'SC', 'ST']),
+  gender: z.enum(['Male', 'Female', 'Other']),
+  occupation: z.string().min(1).max(100),
+  state: z.string().min(1).max(100),
+  landholdingAcres: z.number().min(0),
+  isBPLCardHolder: z.boolean(),
+  isDisabled: z.boolean(),
+}) satisfies z.ZodType<CitizenProfile>;
+
+// ── Basic in-memory rate limiting ─────────────────────────────────────────
+// This calls a paid external API per request, so it shouldn't be left wide
+// open. In-memory is fine for a single-instance hackathon deployment; a
+// real multi-instance production deployment would need a shared store
+// (e.g. Redis) instead.
+const RATE_LIMIT = 10; // requests
+const RATE_WINDOW_MS = 60_000; // per minute
+const requestLog = new Map<string, number[]>();
+
+function isRateLimited(key: string): boolean {
+  const now = Date.now();
+  const timestamps = (requestLog.get(key) || []).filter((t) => now - t < RATE_WINDOW_MS);
+  timestamps.push(now);
+  requestLog.set(key, timestamps);
+  return timestamps.length > RATE_LIMIT;
+}
+
 export async function POST(req: NextRequest) {
+  const ip = req.headers.get('x-forwarded-for')?.split(',')[0].trim() || 'unknown';
+  if (isRateLimited(ip)) {
+    return NextResponse.json(
+      { success: false, error: 'Too many requests. Please wait a moment and try again.' },
+      { status: 429 },
+    );
+  }
+
   try {
     const body = await req.json();
     const { text } = body;
@@ -42,7 +83,34 @@ Transcript to parse: "${text}"`;
     // Sanitize output to remove markdown ticks if the model includes them
     const cleanJsonText = responseText.replace(/```json/g, '').replace(/```/g, '').trim();
 
-    const profile: Partial<CitizenProfile> = JSON.parse(cleanJsonText);
+    let rawProfile: unknown;
+    try {
+      rawProfile = JSON.parse(cleanJsonText);
+    } catch {
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'PARSE_VALIDATION_FAILED',
+          message: "Couldn't understand that clearly. Please try again or fill the form manually.",
+        },
+        { status: 422 },
+      );
+    }
+
+    const validation = citizenProfileSchema.partial().safeParse(rawProfile);
+    if (!validation.success) {
+      console.error('Voice profile failed schema validation:', validation.error.flatten());
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'PARSE_VALIDATION_FAILED',
+          message: "Couldn't understand that clearly. Please try again or fill the form manually.",
+        },
+        { status: 422 },
+      );
+    }
+
+    const profile: Partial<CitizenProfile> = validation.data;
 
     return NextResponse.json({ success: true, profile });
   } catch (error: any) {

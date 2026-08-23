@@ -19,15 +19,23 @@ const MINISTRIES = [
   'Ministry of Rural Development',
   'Ministry of Women & Child Development',
   'Ministry of Housing & Urban Affairs',
-  'Ministry of Electronics & IT',
   'Ministry of Health & Family Welfare',
   'Ministry of Education',
+  'Ministry of Petroleum and Natural Gas',
+  'Ministry of Skill Development and Entrepreneurship',
+  'Ministry of Micro, Small and Medium Enterprises',
+  'Ministry of Social Justice and Empowerment',
+  'State Government Schemes',
 ];
 
-// Map schemes to ministries for filtering
+// Map schemes to ministries for filtering. Central schemes map to their
+// real administering ministry. State schemes (level: 'State' in
+// lib/seedData.ts) don't sit under any single central ministry, so they're
+// grouped under 'State Government Schemes' instead of being force-fit into
+// a central ministry they don't actually belong to.
 const SCHEME_MINISTRY_MAP: Record<string, string> = {
   'PM-KISAN': 'Ministry of Agriculture & Farmers Welfare',
-  'MP-KISAN-KALYAN': 'Ministry of Agriculture & Farmers Welfare',
+  'MP-KISAN-KALYAN': 'State Government Schemes',
   'PM-FASAL-BIMA': 'Ministry of Agriculture & Farmers Welfare',
   'PM-UJJWALA': 'Ministry of Petroleum and Natural Gas',
   'PM-AWAS-GRAMIN': 'Ministry of Rural Development',
@@ -38,6 +46,16 @@ const SCHEME_MINISTRY_MAP: Record<string, string> = {
   'SUKANYA-SAMRIDDHI': 'Ministry of Women & Child Development',
   'PM-KAUSHAL': 'Ministry of Skill Development and Entrepreneurship',
   'AYUSHMAN-BHARAT': 'Ministry of Health & Family Welfare',
+  'NMMSS': 'Ministry of Education',
+  'PRAGATI': 'Ministry of Education',
+  'IGNOAPS': 'Ministry of Rural Development',
+  'IGNDPS': 'Ministry of Rural Development',
+  'STAND-UP-INDIA': 'Ministry of Finance',
+  'PMEGP': 'Ministry of Micro, Small and Medium Enterprises',
+  'MJPJAY': 'State Government Schemes',
+  'MKSY': 'State Government Schemes',
+  'ADIP': 'Ministry of Social Justice and Empowerment',
+  'MVPY': 'State Government Schemes',
 };
 
 const defaultProfile: CitizenProfile = {
@@ -255,36 +273,12 @@ export default function Dashboard() {
       
       <HeroBanner />
 
-      {/* Live Data Status Bar */}
-      <div className="w-full bg-white/80 backdrop-blur-sm border-b border-gray-200 shadow-sm py-2 sticky top-0 z-30">
-        <div className="max-w-[1400px] mx-auto px-4 lg:px-8 flex items-center justify-end text-sm">
-          {isLoading ? (
-            <div className="flex items-center gap-2 text-blue-600 font-semibold animate-pulse">
-              <div className="w-2 h-2 bg-blue-600 rounded-full animate-ping"></div>
-              Syncing Live Registry...
-            </div>
-          ) : fetchError ? (
-            <div className="flex items-center gap-2 text-red-600 font-semibold">
-              <AlertCircle size={16} />
-              Registry Sync Failed
-            </div>
-          ) : (
-            <div className={`flex items-center gap-2 font-semibold ${registrySource === 'live-registry' ? 'text-green-600' : 'text-amber-600'}`}>
-              <div className={`w-2.5 h-2.5 rounded-full ${registrySource === 'live-registry' ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)]'}`}></div>
-              {registrySource === 'live-registry' ? 'Live Feed Connected' : 'Fallback Mode Active'}
-              <span className="text-gray-400 font-normal text-xs ml-2 hidden sm:inline">
-                ({schemes.length} Schemes Indexed)
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
 
       <main className="flex-1 max-w-[1400px] mx-auto w-full p-4 sm:p-6 lg:p-8 space-y-12">
         
         {/* Intake Form Section */}
         <Reveal delay={100}>
-        <section className="bg-[#fcfbf7]/90 backdrop-blur-md rounded-xl shadow-lg border border-[#e2dfd2] overflow-hidden">
+        <section id="applicant-info-section" className="bg-[#fcfbf7]/90 backdrop-blur-md rounded-xl shadow-lg border border-[#e2dfd2] overflow-hidden">
           <div className="border-b border-[#e2dfd2] px-6 py-4 bg-white/80 flex items-center justify-between">
             <h2 className="text-xl font-bold text-[#007b8f] tracking-tight">{t.applicantInfo}</h2>
             <p className="text-sm text-gray-500">{t.fillDetails}</p>
@@ -494,12 +488,12 @@ export default function Dashboard() {
                         <CheckCircle2 size={20} className="text-green-600" />
                         You are eligible for {eligibleResults.length} schemes
                       </h3>
-                      <div className="flex flex-wrap gap-3">
-                        {Object.entries(eligibleCountByCategory).map(([category, count]) => (
-                          <div key={category} className="bg-white border border-green-100 px-4 py-2 rounded-xl shadow-sm flex items-center gap-3">
-                            <span className="text-sm font-semibold text-gray-700">{category}</span>
-                            <span className="bg-green-100 text-green-800 text-xs font-extrabold px-2 py-0.5 rounded-full">{String(count)}</span>
-                          </div>
+                      <div className="text-gray-700 font-medium text-[15px] flex flex-wrap items-center gap-1">
+                        {Object.entries(eligibleCountByCategory).map(([category, count], index, arr) => (
+                          <span key={category}>
+                            {category} ({String(count)})
+                            {index < arr.length - 1 && <span className="mx-2 text-gray-400 font-bold">·</span>}
+                          </span>
                         ))}
                       </div>
                     </div>

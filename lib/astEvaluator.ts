@@ -104,7 +104,7 @@ export class SchemeEngine {
         actual: profile.annualIncome,
         required: maxIncome,
         delta,
-        message: `Income exceeds maximum limit by ?${delta}`,
+        message: `Income exceeds maximum limit by ₹${delta}`,
         actionable: t?.actionReduceIncome.replace('{delta}', String(delta)).replace('{fallbackText}', getFallbackText('maxIncome'))
       });
     }

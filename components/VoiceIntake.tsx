@@ -22,7 +22,7 @@ export default function VoiceIntake({ onProfileParsed, speakLabel, listeningLabe
   const [transcript, setTranscript] = useState('');
   const [isParsing, setIsParsing] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [langCode, setLangCode] = useState('hi-IN');
+  const [langCode, setLangCode] = useState('en-IN');
   const [langName, setLangName] = useState('Hindi');
   const recognitionRef = useRef<any>(null);
 
@@ -34,7 +34,7 @@ export default function VoiceIntake({ onProfileParsed, speakLabel, listeningLabe
         recognitionRef.current.continuous = false;
         recognitionRef.current.interimResults = true;
         
-        const initialLang = localStorage.getItem('preferredLang') || 'hi-IN';
+        const initialLang = localStorage.getItem('preferredLang') || 'en-IN';
         recognitionRef.current.lang = initialLang;
 
         recognitionRef.current.onresult = (event: any) => {
@@ -62,7 +62,7 @@ export default function VoiceIntake({ onProfileParsed, speakLabel, listeningLabe
 
   useEffect(() => {
     const updateLanguage = () => {
-      const stored = localStorage.getItem('preferredLang') || 'hi-IN';
+      const stored = localStorage.getItem('preferredLang') || 'en-IN';
       setLangCode(stored);
       
       const names: Record<string, string> = {
@@ -104,8 +104,12 @@ export default function VoiceIntake({ onProfileParsed, speakLabel, listeningLabe
       const data = await response.json();
       if (data.success && data.profile) {
         onProfileParsed(data.profile);
+      } else if (data.error === 'PARSE_VALIDATION_FAILED') {
+        setError(data.message || "Couldn't understand that clearly. Please fill the form manually instead.");
+      } else if (response.status === 429) {
+        setError('Too many attempts. Please wait a moment and try again.');
       } else {
-        setError(data.error || 'Failed to parse');
+        setError(data.error || 'Failed to parse — please fill the form manually instead.');
       }
     } catch (err) {
       setError('Network error while parsing');
