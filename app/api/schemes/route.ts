@@ -1,247 +1,94 @@
 import { NextResponse } from 'next/server';
 import type { Scheme } from '../../../types/scheme';
+import { SCHEME_DB, REGISTRY_VERSION, REGISTRY_LAST_UPDATED } from '../../../lib/seedData';
 
-// ─── Simulated Live Open-Data Registry ─────────────────────────────────────
-// In production this would point to https://api.data.gov.in/resource/...
-// with a valid API key.  We simulate latency + a live payload here so the
-// frontend treats the data as truly dynamic.
+// ─────────────────────────────────────────────────────────────────────────
+// Scheme Registry Endpoint
+//
+// Default behaviour (no configuration required): serves the curated local
+// scheme registry from lib/seedData.ts. This is honest — we do NOT pretend
+// to hit a live government API we don't actually have access to.
+//
+// Optional real live augmentation: if EXTERNAL_SCHEME_FEED_URL is set in
+// the environment, this route genuinely attempts to fetch additional
+// schemes from that URL (with a timeout) and merges any that pass basic
+// shape validation. If the env var is unset, no network call is made at
+// all — there is nothing fake happening under the hood either way.
+// ─────────────────────────────────────────────────────────────────────────
 
-const LIVE_REGISTRY_URL =
-  'https://api.data.gov.in/resource/bharat-yojana-schemes';
+export const dynamic = 'force-dynamic';
 
-// ─── Core Fallback Payload ──────────────────────────────────────────────────
-// Guaranteed to load even when the upstream registry is unreachable (rural
-// low-connectivity environments, data.gov.in maintenance windows, etc.).
+type RegistrySource = 'local-registry' | 'external-feed' | 'external-feed-unavailable';
 
-const FALLBACK_SCHEMES: Scheme[] = [
-  {
-    id: 'scheme_1',
-    code: 'PM-KISAN',
-    title: 'Pradhan Mantri Kisan Samman Nidhi',
-    category: 'Agriculture',
-    level: 'Central',
-    rulesAST: { '==': [{ var: 'occupation' }, 'Farmer'] },
-    numericLimits: { maxLandholdingAcres: 4.94 },
-    fallbackSchemeIds: ['scheme_2'],
-  },
-  {
-    id: 'scheme_2',
-    code: 'MP-KISAN-KALYAN',
-    title: 'Mukhyamantri Kisan Kalyan Yojana',
-    category: 'Agriculture',
-    level: 'State',
-    rulesAST: {
-      and: [
-        { '==': [{ var: 'occupation' }, 'Farmer'] },
-        { '==': [{ var: 'state' }, 'Madhya Pradesh'] },
-      ],
-    },
-    numericLimits: { maxLandholdingAcres: 10.0 },
-    fallbackSchemeIds: [],
-  },
-  {
-    id: 'scheme_3',
-    code: 'PM-FASAL-BIMA',
-    title: 'Pradhan Mantri Fasal Bima Yojana',
-    category: 'Agriculture',
-    level: 'Central',
-    rulesAST: { '==': [{ var: 'occupation' }, 'Farmer'] },
-    numericLimits: { maxLandholdingAcres: 25.0 },
-    fallbackSchemeIds: ['scheme_1'],
-  },
-  {
-    id: 'scheme_4',
-    code: 'PM-UJJWALA',
-    title: 'Pradhan Mantri Ujjwala Yojana',
-    category: 'Financial Inclusion',
-    level: 'Central',
-    rulesAST: {
-      and: [
-        { '==': [{ var: 'isBPLCardHolder' }, true] },
-        { '==': [{ var: 'gender' }, 'Female'] },
-      ],
-    },
-    numericLimits: { maxIncome: 200000, minAge: 18 },
-    fallbackSchemeIds: ['scheme_5'],
-  },
-  {
-    id: 'scheme_5',
-    code: 'PM-AWAS-GRAMIN',
-    title: 'Pradhan Mantri Awas Yojana – Gramin',
-    category: 'Housing',
-    level: 'Central',
-    rulesAST: { '==': [{ var: 'isBPLCardHolder' }, true] },
-    numericLimits: { maxIncome: 300000 },
-    fallbackSchemeIds: [],
-  },
-  {
-    id: 'scheme_6',
-    code: 'PMJDY',
-    title: 'Pradhan Mantri Jan Dhan Yojana',
-    category: 'Financial Inclusion',
-    level: 'Central',
-    rulesAST: { '>=': [{ var: 'age' }, 10] },
-    numericLimits: { minAge: 10, maxAge: 65 },
-    fallbackSchemeIds: [],
-  },
-];
+function isValidScheme(x: any): x is Scheme {
+  return (
+    x &&
+    typeof x.id === 'string' &&
+    typeof x.code === 'string' &&
+    typeof x.title === 'string' &&
+    typeof x.category === 'string' &&
+    (x.level === 'Central' || x.level === 'State') &&
+    typeof x.rulesAST === 'object' &&
+    typeof x.numericLimits === 'object' &&
+    Array.isArray(x.fallbackSchemeIds)
+  );
+}
 
-// ─── Live Augmentation Layer ────────────────────────────────────────────────
-// Additional schemes that are fetched "live" and merged on top of the
-// fallback set to simulate a growing, dynamically-updated registry.
-
-const LIVE_AUGMENTED_SCHEMES: Scheme[] = [
-  {
-    id: 'scheme_7',
-    code: 'PM-SVANidhi',
-    title: 'PM Street Vendor\'s AtmaNirbhar Nidhi',
-    category: 'Financial Inclusion',
-    level: 'Central',
-    rulesAST: {
-      and: [
-        { '==': [{ var: 'occupation' }, 'Street Vendor'] },
-        { '>=': [{ var: 'age' }, 18] },
-      ],
-    },
-    numericLimits: { minAge: 18, maxAge: 65 },
-    fallbackSchemeIds: ['scheme_6'],
-  },
-  {
-    id: 'scheme_8',
-    code: 'PMSBY',
-    title: 'Pradhan Mantri Suraksha Bima Yojana',
-    category: 'Insurance',
-    level: 'Central',
-    rulesAST: {
-      and: [
-        { '>=': [{ var: 'age' }, 18] },
-        { '<=': [{ var: 'age' }, 70] },
-      ],
-    },
-    numericLimits: { minAge: 18, maxAge: 70 },
-    fallbackSchemeIds: [],
-  },
-  {
-    id: 'scheme_9',
-    code: 'PM-MUDRA',
-    title: 'Pradhan Mantri MUDRA Yojana',
-    category: 'Financial Inclusion',
-    level: 'Central',
-    rulesAST: {
-      and: [
-        { '>=': [{ var: 'age' }, 18] },
-        { '!=': [{ var: 'occupation' }, ''] },
-      ],
-    },
-    numericLimits: { minAge: 18, maxIncome: 1000000 },
-    fallbackSchemeIds: ['scheme_6'],
-  },
-  {
-    id: 'scheme_10',
-    code: 'SUKANYA-SAMRIDDHI',
-    title: 'Sukanya Samriddhi Yojana',
-    category: 'Women & Child Development',
-    level: 'Central',
-    rulesAST: { '==': [{ var: 'gender' }, 'Female'] },
-    numericLimits: { maxAge: 10 },
-    fallbackSchemeIds: [],
-  },
-  {
-    id: 'scheme_11',
-    code: 'PM-KAUSHAL',
-    title: 'Pradhan Mantri Kaushal Vikas Yojana',
-    category: 'Education',
-    level: 'Central',
-    rulesAST: {
-      and: [
-        { '>=': [{ var: 'age' }, 15] },
-        { '<=': [{ var: 'age' }, 45] },
-      ],
-    },
-    numericLimits: { minAge: 15, maxAge: 45 },
-    fallbackSchemeIds: [],
-  },
-  {
-    id: 'scheme_12',
-    code: 'AYUSHMAN-BHARAT',
-    title: 'Ayushman Bharat Pradhan Mantri Jan Arogya Yojana',
-    category: 'Healthcare',
-    level: 'Central',
-    rulesAST: { '==': [{ var: 'isBPLCardHolder' }, true] },
-    numericLimits: { maxIncome: 500000 },
-    fallbackSchemeIds: ['scheme_5'],
-  },
-];
-
-// ─── Dynamic Registry Fetcher ───────────────────────────────────────────────
-
-async function fetchLiveRegistry(): Promise<{
+async function loadSchemes(): Promise<{
   schemes: Scheme[];
-  source: 'live-registry' | 'fallback-cache';
-  timestamp: string;
-  totalSchemes: number;
+  source: RegistrySource;
+  externalFeedError?: string;
 }> {
-  const timestamp = new Date().toISOString();
+  const feedUrl = process.env.EXTERNAL_SCHEME_FEED_URL;
 
+  // No external feed configured -> serve the local registry only.
+  // This is the default, truthful state for this project.
+  if (!feedUrl) {
+    return { schemes: SCHEME_DB, source: 'local-registry' };
+  }
+
+  // A real external feed IS configured -> genuinely attempt to reach it.
   try {
-    // Attempt to contact the live open-data registry.
-    // AbortController enforces a strict 3-second timeout so that
-    // rural users on 2G/3G never stall.
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 3000);
-
-    const res = await fetch(LIVE_REGISTRY_URL, {
-      signal: controller.signal,
-      cache: 'no-store', // disable caching — always fresh
-    });
-
+    const res = await fetch(feedUrl, { signal: controller.signal, cache: 'no-store' });
     clearTimeout(timeout);
 
-    if (res.ok) {
-      // If the upstream were real, we'd map its records here:
-      // const raw = await res.json();
-      // const mapped = raw.records.map(mapToScheme);
-      // For now the "live" path returns the augmented set.
-      const allSchemes = [...FALLBACK_SCHEMES, ...LIVE_AUGMENTED_SCHEMES];
-      return {
-        schemes: allSchemes,
-        source: 'live-registry',
-        timestamp,
-        totalSchemes: allSchemes.length,
-      };
-    }
+    if (!res.ok) throw new Error(`External feed returned HTTP ${res.status}`);
 
-    throw new Error(`Registry returned HTTP ${res.status}`);
-  } catch (_err) {
-    // ─── Graceful Fallback ────────────────────────────────────────────
-    // The upstream is unreachable (offline, timeout, DNS failure, etc.).
-    // We merge fallback + augmented so the user always sees the full
-    // catalogue even in zero-connectivity scenarios.
-    const allSchemes = [...FALLBACK_SCHEMES, ...LIVE_AUGMENTED_SCHEMES];
+    const raw = await res.json();
+    const incoming: unknown[] = Array.isArray(raw) ? raw : raw?.schemes;
+    if (!Array.isArray(incoming)) throw new Error('External feed payload was not a scheme array');
+
+    const validExternalSchemes = incoming.filter(isValidScheme);
+    const localIds = new Set(SCHEME_DB.map((s) => s.id));
+    const merged = [...SCHEME_DB, ...validExternalSchemes.filter((s) => !localIds.has(s.id))];
+
+    return { schemes: merged, source: 'external-feed' };
+  } catch (err) {
+    // Real failure, honestly reported — we still return the local registry
+    // so the app stays usable, but we do NOT claim the external feed worked.
     return {
-      schemes: allSchemes,
-      source: 'fallback-cache',
-      timestamp,
-      totalSchemes: allSchemes.length,
+      schemes: SCHEME_DB,
+      source: 'external-feed-unavailable',
+      externalFeedError: err instanceof Error ? err.message : 'Unknown error',
     };
   }
 }
 
-// ─── GET Handler ────────────────────────────────────────────────────────────
-
-export const dynamic = 'force-dynamic'; // never cache this route
-
 export async function GET() {
-  const { schemes, source, timestamp, totalSchemes } =
-    await fetchLiveRegistry();
+  const { schemes, source, externalFeedError } = await loadSchemes();
 
   return NextResponse.json(
     {
       success: true,
       schemes,
       source,
-      timestamp,
-      totalSchemes,
+      registryVersion: REGISTRY_VERSION,
+      registryLastUpdated: REGISTRY_LAST_UPDATED,
+      totalSchemes: schemes.length,
+      timestamp: new Date().toISOString(),
+      ...(externalFeedError ? { externalFeedError } : {}),
     },
     { status: 200 }
   );

@@ -20,13 +20,27 @@ export interface QuantitativeGap {
   required: number;
   delta: number;
   message: string;
+  actionable?: string;
 }
 
+/**
+ * Per-category override: if the citizen's category matches a key, that value
+ * is used instead of the top-level default. When a plain number is given the
+ * limit applies uniformly to all categories.
+ */
+export type CategoryOverride<T> = T | {
+  default: T;
+  General?: T;
+  SC?: T;
+  ST?: T;
+  OBC?: T;
+};
+
 export interface SchemeLimits {
-  maxIncome?: number;
-  minAge?: number;
-  maxAge?: number;
-  maxLandholdingAcres?: number;
+  maxIncome?: CategoryOverride<number>;
+  minAge?: CategoryOverride<number>;
+  maxAge?: CategoryOverride<number>;
+  maxLandholdingAcres?: CategoryOverride<number>;
 }
 
 export interface Scheme {

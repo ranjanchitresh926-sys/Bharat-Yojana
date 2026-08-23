@@ -10,7 +10,7 @@ import GovHeader from '../components/GovHeader';
 import HeroBanner from '../components/HeroBanner';
 import GovFooter from '../components/GovFooter';
 import Reveal from '../components/Reveal';
-import { CheckCircle2, XCircle, AlertCircle, TrendingUp, Search } from 'lucide-react';
+import { CheckCircle2, XCircle, AlertCircle, TrendingUp, Search, Download } from 'lucide-react';
 
 const MINISTRIES = [
   'All Ministries',
@@ -29,9 +29,15 @@ const SCHEME_MINISTRY_MAP: Record<string, string> = {
   'PM-KISAN': 'Ministry of Agriculture & Farmers Welfare',
   'MP-KISAN-KALYAN': 'Ministry of Agriculture & Farmers Welfare',
   'PM-FASAL-BIMA': 'Ministry of Agriculture & Farmers Welfare',
-  'PM-UJJWALA': 'Ministry of Rural Development',
-  'PM-AWAS-GRAMIN': 'Ministry of Housing & Urban Affairs',
+  'PM-UJJWALA': 'Ministry of Petroleum and Natural Gas',
+  'PM-AWAS-GRAMIN': 'Ministry of Rural Development',
   'PMJDY': 'Ministry of Finance',
+  'PM-SVANidhi': 'Ministry of Housing & Urban Affairs',
+  'PMSBY': 'Ministry of Finance',
+  'PM-MUDRA': 'Ministry of Finance',
+  'SUKANYA-SAMRIDDHI': 'Ministry of Women & Child Development',
+  'PM-KAUSHAL': 'Ministry of Skill Development and Entrepreneurship',
+  'AYUSHMAN-BHARAT': 'Ministry of Health & Family Welfare',
 };
 
 const defaultProfile: CitizenProfile = {
@@ -59,6 +65,30 @@ export default function Dashboard() {
   const [selectedMinistry, setSelectedMinistry] = useState('All Ministries');
   const [langCode, setLangCode] = useState('en-IN');
   const [t, setT] = useState<TranslationSet>(getTranslations('en-IN'));
+  const [isLoaded, setIsLoaded] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('bharat_yojana_state');
+    if (saved) {
+      try {
+        const { profile: sp, results: sr, hasSearched: sh, searchQuery: sq, selectedMinistry: sm } = JSON.parse(saved);
+        if (sp) setProfile(sp);
+        if (sr) setResults(sr);
+        if (sh !== undefined) setHasSearched(sh);
+        if (sq !== undefined) setSearchQuery(sq);
+        if (sm) setSelectedMinistry(sm);
+      } catch (e) {
+        console.error('Failed to parse saved state', e);
+      }
+    }
+    setIsLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (isLoaded) {
+      localStorage.setItem('bharat_yojana_state', JSON.stringify({ profile, results, hasSearched, searchQuery, selectedMinistry }));
+    }
+  }, [isLoaded, profile, results, hasSearched, searchQuery, selectedMinistry]);
 
   // Listen for language changes
   useEffect(() => {
@@ -111,7 +141,7 @@ export default function Dashboard() {
       return matchesText && matchesMinistry;
     });
 
-    const evals = filteredSchemes.map(scheme => SchemeEngine.evaluate(profile, scheme));
+    const evals = filteredSchemes.map(scheme => SchemeEngine.evaluate(profile, scheme, schemes, t));
     setResults(evals);
     setHasSearched(true);
   };
@@ -136,6 +166,87 @@ export default function Dashboard() {
     }
     setHasSearched(false);
   };
+
+  const generatePDFReport = () => {
+    import('jspdf').then(({ default: jsPDF }) => {
+      import('jspdf-autotable').then(({ default: autoTable }) => {
+        const doc = new jsPDF();
+        doc.setFontSize(18);
+        doc.text('Bharat Yojana Eligibility Report', 14, 22);
+
+        doc.setFontSize(12);
+        doc.setTextColor(100);
+        doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 30);
+        doc.setTextColor(0);
+
+        // Citizen Profile section
+        doc.setFontSize(14);
+        doc.text('Citizen Profile', 14, 45);
+        autoTable(doc, {
+          startY: 50,
+          head: [['Field', 'Value']],
+          body: [
+            ['Age', String(profile.age)],
+            ['Annual Income', `Rs. ${profile.annualIncome}`],
+            ['Gender', profile.gender],
+            ['Caste Category', profile.casteCategory],
+            ['Occupation', profile.occupation || 'N/A'],
+            ['State', profile.state || 'N/A'],
+            ['Landholding (Acres)', String(profile.landholdingAcres)],
+            ['BPL Card Holder', profile.isBPLCardHolder ? 'Yes' : 'No'],
+            ['Disabled', profile.isDisabled ? 'Yes' : 'No'],
+          ],
+          margin: { left: 14 }
+        });
+
+        // Evaluation Results section
+        const finalY = (doc as any).lastAutoTable.finalY || 120;
+        doc.text('Evaluated Schemes', 14, finalY + 15);
+
+        const tableData = results.map((result) => {
+          const scheme = schemes.find(s => s.id === result.schemeId);
+          if (!scheme) return [];
+          const status = result.isEligible ? 'Eligible' : 'Not Eligible';
+          const gaps = result.quantitativeGaps.map((g: any) => g.message).join('; ');
+          return [scheme.code, scheme.title, status, gaps || 'None'];
+        }).filter(row => row.length > 0);
+
+        autoTable(doc, {
+          startY: finalY + 20,
+          head: [['Code', 'Scheme Name', 'Status', 'Gaps']],
+          body: tableData,
+          margin: { left: 14 },
+          columnStyles: {
+            0: { cellWidth: 30 },
+            1: { cellWidth: 50 },
+            2: { cellWidth: 30 },
+            3: { cellWidth: 70 }
+          },
+          didParseCell: function(data) {
+            if (data.section === 'body' && data.column.index === 2) {
+              if (data.cell.raw === 'Eligible') {
+                data.cell.styles.textColor = [0, 128, 0];
+                data.cell.styles.fontStyle = 'bold';
+              } else {
+                data.cell.styles.textColor = [200, 0, 0];
+              }
+            }
+          }
+        });
+
+        doc.save('scheme_eligibility_report.pdf');
+      });
+    });
+  };
+
+  const eligibleResults = results.filter(r => r.isEligible);
+  const eligibleCountByCategory = eligibleResults.reduce((acc, result) => {
+    const scheme = schemes.find(s => s.id === result.schemeId);
+    if (scheme) {
+      acc[scheme.category] = (acc[scheme.category] || 0) + 1;
+    }
+    return acc;
+  }, {} as Record<string, number>);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-orange-100/50 via-white to-green-100/50 flex flex-col font-sans">
@@ -296,14 +407,27 @@ export default function Dashboard() {
               </div>
 
               {/* Search Schemes Button */}
-              <div className="pt-6 border-t border-[#e2dfd2]">
+              <div className="pt-6 border-t border-[#e2dfd2] flex flex-col sm:flex-row items-center gap-4">
                 <button
                   onClick={runSearch}
                   disabled={isLoading}
-                  className="w-full md:w-auto flex items-center justify-center gap-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-8 py-3.5 rounded-lg font-bold text-base shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full sm:w-auto flex items-center justify-center gap-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-8 py-3.5 rounded-lg font-bold text-base shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Search size={20} />
                   {t.searchSchemes}
+                </button>
+                <button
+                  onClick={() => {
+                    localStorage.removeItem('bharat_yojana_state');
+                    setProfile(defaultProfile);
+                    setResults([]);
+                    setHasSearched(false);
+                    setSearchQuery('');
+                    setSelectedMinistry('All Ministries');
+                  }}
+                  className="text-sm font-semibold text-gray-500 hover:text-gray-800 transition-colors"
+                >
+                  Clear saved data
                 </button>
               </div>
 
@@ -316,10 +440,19 @@ export default function Dashboard() {
         {hasSearched && (
           <Reveal delay={200}>
           <section className="space-y-6 pt-4">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-gray-900 tracking-tight">{t.eligibilityResults}</h2>
-              <span className="bg-blue-100 text-blue-800 text-sm py-1.5 px-4 rounded-full font-bold shadow-sm">{results.length} {t.schemesAnalyzed}</span>
-            </div>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <h2 className="text-2xl font-bold text-gray-900 tracking-tight">{t.eligibilityResults}</h2>
+                  <span className="bg-blue-100 text-blue-800 text-sm py-1.5 px-4 rounded-full font-bold shadow-sm">{results.length} {t.schemesAnalyzed}</span>
+                </div>
+                <button
+                  onClick={generatePDFReport}
+                  className="flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-900 text-white px-5 py-2.5 rounded-lg text-sm font-semibold transition-colors shadow-sm"
+                >
+                  <Download size={16} />
+                  Download Report
+                </button>
+              </div>
 
             {/* Loading State */}
             {isLoading && (
@@ -354,7 +487,24 @@ export default function Dashboard() {
 
             {/* Results */}
             {!isLoading && !fetchError && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <>
+                  {eligibleResults.length > 0 && (
+                    <div className="bg-green-50/80 border border-green-200 rounded-2xl p-6 mb-6">
+                      <h3 className="text-lg font-bold text-green-900 mb-4 flex items-center gap-2">
+                        <CheckCircle2 size={20} className="text-green-600" />
+                        You are eligible for {eligibleResults.length} schemes
+                      </h3>
+                      <div className="flex flex-wrap gap-3">
+                        {Object.entries(eligibleCountByCategory).map(([category, count]) => (
+                          <div key={category} className="bg-white border border-green-100 px-4 py-2 rounded-xl shadow-sm flex items-center gap-3">
+                            <span className="text-sm font-semibold text-gray-700">{category}</span>
+                            <span className="bg-green-100 text-green-800 text-xs font-extrabold px-2 py-0.5 rounded-full">{String(count)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {results.map((result, idx) => {
                   const scheme = schemes.find(s => s.id === result.schemeId)!;
                   const ministry = SCHEME_MINISTRY_MAP[scheme.code] || '';
@@ -391,7 +541,10 @@ export default function Dashboard() {
                             </h4>
                             {result.quantitativeGaps.map((gap: any, i: number) => (
                               <div key={i} className="text-xs bg-white p-3 rounded-lg shadow-sm border border-red-50">
-                                <span className="text-gray-800 font-medium block mb-2">{gap.message}</span>
+                                <span className="text-gray-800 font-medium block mb-1">{gap.message}</span>
+                                {gap.actionable && (
+                                  <span className="text-blue-700 font-semibold block mb-2 leading-relaxed bg-blue-50 p-2 rounded">{gap.actionable}</span>
+                                )}
                                 <div className="flex items-center justify-between font-mono text-[11px] bg-gray-50 p-1.5 rounded">
                                   <span className="text-gray-600">Actual: {gap.actual}</span>
                                   <span className="text-green-600 font-bold">Req: {gap.required}</span>
@@ -418,13 +571,23 @@ export default function Dashboard() {
                             </div>
                           </div>
                         )}
+                        <details className="group mt-4 pt-4 border-t border-gray-100">
+                            <summary className="cursor-pointer text-[12px] font-extrabold text-gray-500 uppercase tracking-widest flex items-center gap-1.5 list-none outline-none">
+                              <span className="text-[10px] group-open:rotate-90 transition-transform">▶</span> Why this result?
+                            </summary>
+                            <div className="mt-3 text-sm text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-200 leading-relaxed font-medium">
+                              <span className="block mb-1 text-xs text-gray-500 uppercase tracking-wider font-bold">Rules Evaluated:</span>
+                              {SchemeEngine.astToText(scheme.rulesAST)}
+                            </div>
+                        </details>
                       </div>
                     </div>
                   );
-                })}
-              </div>
-            )}
-          </section>
+                  })}
+                </div>
+                </>
+              )}
+            </section>
           </Reveal>
         )}
       </main>

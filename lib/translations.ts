@@ -34,6 +34,11 @@ export interface TranslationSet {
   allMinistries: string;
   speakProfile: string;
   listeningIn: string;
+  actionReduceIncome: string;
+  actionReduceLand: string;
+  actionIncreaseAge: string;
+  actionReduceAge: string;
+  actionFallbackText: string;
 }
 
 const translations: Record<string, TranslationSet> = {
@@ -68,6 +73,12 @@ const translations: Record<string, TranslationSet> = {
     allMinistries: 'All Ministries',
     speakProfile: 'Speak your profile details',
     listeningIn: 'Listening in',
+
+    actionReduceIncome: 'Income would need to reduce by Rs. {delta}{fallbackText}',
+    actionReduceLand: 'Landholding would need to reduce by {delta} acres{fallbackText}',
+    actionIncreaseAge: 'Age would need to increase by {delta} years{fallbackText}',
+    actionReduceAge: 'Age would need to reduce by {delta} years{fallbackText}',
+    actionFallbackText: ', or you may qualify for {fallbackCode} instead which allows up to {fallbackLimit}',
   },
   'hi-IN': {
     applicantInfo: 'आवेदक की जानकारी',
@@ -100,6 +111,12 @@ const translations: Record<string, TranslationSet> = {
     allMinistries: 'सभी मंत्रालय',
     speakProfile: 'अपना विवरण बोलें',
     listeningIn: 'सुन रहा है',
+
+    actionReduceIncome: 'Income would need to reduce by Rs. {delta}{fallbackText}',
+    actionReduceLand: 'Landholding would need to reduce by {delta} acres{fallbackText}',
+    actionIncreaseAge: 'Age would need to increase by {delta} years{fallbackText}',
+    actionReduceAge: 'Age would need to reduce by {delta} years{fallbackText}',
+    actionFallbackText: ', or you may qualify for {fallbackCode} instead which allows up to {fallbackLimit}',
   },
   'bn-IN': {
     applicantInfo: 'আবেদনকারীর তথ্য',
@@ -132,6 +149,12 @@ const translations: Record<string, TranslationSet> = {
     allMinistries: 'সমস্ত মন্ত্রণালয়',
     speakProfile: 'আপনার বিবরণ বলুন',
     listeningIn: 'শুনছি',
+
+    actionReduceIncome: 'Income would need to reduce by Rs. {delta}{fallbackText}',
+    actionReduceLand: 'Landholding would need to reduce by {delta} acres{fallbackText}',
+    actionIncreaseAge: 'Age would need to increase by {delta} years{fallbackText}',
+    actionReduceAge: 'Age would need to reduce by {delta} years{fallbackText}',
+    actionFallbackText: ', or you may qualify for {fallbackCode} instead which allows up to {fallbackLimit}',
   },
   'mr-IN': {
     applicantInfo: 'अर्जदाराची माहिती',
@@ -164,6 +187,12 @@ const translations: Record<string, TranslationSet> = {
     allMinistries: 'सर्व मंत्रालये',
     speakProfile: 'तुमचे तपशील बोला',
     listeningIn: 'ऐकत आहे',
+
+    actionReduceIncome: 'Income would need to reduce by Rs. {delta}{fallbackText}',
+    actionReduceLand: 'Landholding would need to reduce by {delta} acres{fallbackText}',
+    actionIncreaseAge: 'Age would need to increase by {delta} years{fallbackText}',
+    actionReduceAge: 'Age would need to reduce by {delta} years{fallbackText}',
+    actionFallbackText: ', or you may qualify for {fallbackCode} instead which allows up to {fallbackLimit}',
   },
   'ta-IN': {
     applicantInfo: 'விண்ணப்பதாரர் தகவல்',
@@ -196,6 +225,12 @@ const translations: Record<string, TranslationSet> = {
     allMinistries: 'அனைத்து அமைச்சகங்கள்',
     speakProfile: 'உங்கள் விவரங்களைக் கூறுங்கள்',
     listeningIn: 'கேட்கிறது',
+
+    actionReduceIncome: 'Income would need to reduce by Rs. {delta}{fallbackText}',
+    actionReduceLand: 'Landholding would need to reduce by {delta} acres{fallbackText}',
+    actionIncreaseAge: 'Age would need to increase by {delta} years{fallbackText}',
+    actionReduceAge: 'Age would need to reduce by {delta} years{fallbackText}',
+    actionFallbackText: ', or you may qualify for {fallbackCode} instead which allows up to {fallbackLimit}',
   },
   'te-IN': {
     applicantInfo: 'దరఖాస్తుదారు సమాచారం',
@@ -228,6 +263,12 @@ const translations: Record<string, TranslationSet> = {
     allMinistries: 'అన్ని మంత్రిత్వ శాఖలు',
     speakProfile: 'మీ వివరాలను చెప్పండి',
     listeningIn: 'వింటోంది',
+
+    actionReduceIncome: 'Income would need to reduce by Rs. {delta}{fallbackText}',
+    actionReduceLand: 'Landholding would need to reduce by {delta} acres{fallbackText}',
+    actionIncreaseAge: 'Age would need to increase by {delta} years{fallbackText}',
+    actionReduceAge: 'Age would need to reduce by {delta} years{fallbackText}',
+    actionFallbackText: ', or you may qualify for {fallbackCode} instead which allows up to {fallbackLimit}',
   },
 };
 

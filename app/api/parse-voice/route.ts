@@ -45,8 +45,12 @@ Transcript to parse: "${text}"`;
     const profile: Partial<CitizenProfile> = JSON.parse(cleanJsonText);
 
     return NextResponse.json({ success: true, profile });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error with Gemini voice parsing:', error);
-    return NextResponse.json({ success: false, error: 'Failed to parse text via AI' }, { status: 500 });
+    return NextResponse.json({ 
+      success: false, 
+      error: 'Failed to parse text via AI',
+      details: error?.message || String(error)
+    }, { status: 500 });
   }
 }

@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Landmark, Search, Glasses, Accessibility } from 'lucide-react';
+import { Landmark, Search, Glasses } from 'lucide-react';
 
 interface GovHeaderProps {
   searchQuery?: string;
@@ -12,10 +12,7 @@ interface GovHeaderProps {
 
 const NAV_ITEMS = [
   { label: 'Home', href: '/' },
-  { label: 'Ministry', href: '/ministry' },
   { label: 'Offerings / Schemes', href: '/', matchExact: true },
-  { label: 'Documents', href: '/documents' },
-  { label: 'Media', href: '/media' },
   { label: 'Connect', href: '/connect' },
 ];
 
@@ -79,10 +76,6 @@ export default function GovHeader({ searchQuery = '', onSearchChange }: GovHeade
             </div>
             
             <div className="h-6 w-px bg-gray-300 mx-1"></div>
-            
-            <button className="p-1.5 hover:bg-gray-100 rounded transition text-blue-800" title="Accessibility Options">
-              <Accessibility size={20} />
-            </button>
 
             <button 
               onClick={openLanguageModal} 

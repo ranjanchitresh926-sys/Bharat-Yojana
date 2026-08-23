@@ -21,9 +21,9 @@ export default function HeroBanner() {
           <div className="max-w-2xl">
             {/* Breadcrumb */}
             <div className="flex items-center text-xs font-bold text-gray-500 mb-6 tracking-wide uppercase">
-              <span className="hover:text-orange-600 cursor-pointer transition-colors">Home</span>
+              <span>Home</span>
               <ChevronRight size={14} className="mx-2 opacity-50" />
-              <span className="hover:text-orange-600 cursor-pointer transition-colors">Offerings</span>
+              <span>Offerings</span>
               <ChevronRight size={14} className="mx-2 opacity-50" />
               <span className="text-gray-800 border-b-2 border-orange-400 pb-0.5">Schemes</span>
             </div>
@@ -43,7 +43,10 @@ export default function HeroBanner() {
               </p>
             </div>
 
-            <button className="flex items-center gap-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-3 rounded-lg font-bold text-lg shadow-lg hover:shadow-xl hover:from-orange-600 hover:to-orange-700 transition-all">
+            <button
+              onClick={() => document.getElementById('applicant-info-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+              className="flex items-center gap-3 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-3 rounded-lg font-bold text-lg shadow-lg hover:shadow-xl hover:from-orange-600 hover:to-orange-700 transition-all"
+            >
               Explore Schemes
               <span className="bg-white text-orange-600 rounded p-1">
                 <ArrowRight size={18} strokeWidth={3} />
