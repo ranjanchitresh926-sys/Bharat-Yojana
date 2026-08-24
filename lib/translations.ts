@@ -4,6 +4,26 @@
 export type LangCode = 'en-IN' | 'hi-IN' | 'bn-IN' | 'mr-IN' | 'ta-IN' | 'te-IN';
 
 export interface TranslationSet {
+  clearSavedData: string;
+  downloadReport: string;
+  youAreEligibleFor: string;
+  schemesText: string;
+  heroHome: string;
+  heroOfferings: string;
+  heroSchemes: string;
+  heroBharat: string;
+  heroYojana: string;
+  heroGovSchemes: string;
+  heroSimplified: string;
+  heroDesc1: string;
+  heroDesc2: string;
+  heroExploreBtn: string;
+  phoneExploreTitle: string;
+  phoneRecForYou: string;
+  phoneRecDesc: string;
+  phoneAgri: string;
+  phoneFin: string;
+
   applicantInfo: string;
   fillDetails: string;
   age: string;
@@ -43,6 +63,25 @@ export interface TranslationSet {
 
 const translations: Record<string, TranslationSet> = {
   'en-IN': {
+    clearSavedData: 'Clear saved data',
+    downloadReport: 'Download Report',
+    youAreEligibleFor: 'You are eligible for',
+    schemesText: 'schemes',
+    heroHome: 'Home',
+    heroOfferings: 'Offerings',
+    heroSchemes: 'Schemes',
+    heroBharat: 'Bharat',
+    heroYojana: 'Yojana',
+    heroGovSchemes: 'Government Schemes,',
+    heroSimplified: 'Simplified for You.',
+    heroDesc1: 'Discover programmes aimed at enhancing social welfare, economic development, and agriculture.',
+    heroDesc2: 'Find the best schemes in your own language.',
+    heroExploreBtn: 'Explore Schemes',
+    phoneExploreTitle: 'Explore eligible schemes',
+    phoneRecForYou: 'Recommended for you',
+    phoneRecDesc: 'Find relevant schemes based on your region, age and gender.',
+    phoneAgri: 'Agriculture',
+    phoneFin: 'Financial Inclusion',
     applicantInfo: 'Applicant Information',
     fillDetails: 'Fill details manually or use voice input',
     age: 'Age (Years)',
@@ -81,6 +120,25 @@ const translations: Record<string, TranslationSet> = {
     actionFallbackText: ', or you may qualify for {fallbackCode} instead which allows up to {fallbackLimit}',
   },
   'hi-IN': {
+    clearSavedData: 'सहेजा गया डेटा साफ़ करें',
+    downloadReport: 'रिपोर्ट डाउनलोड करें',
+    youAreEligibleFor: 'आप योग्य हैं',
+    schemesText: 'योजनाओं',
+    heroHome: 'होम',
+    heroOfferings: 'प्रस्ताव',
+    heroSchemes: 'योजनाएं',
+    heroBharat: 'भारत',
+    heroYojana: 'योजना',
+    heroGovSchemes: 'सरकारी योजनाएं,',
+    heroSimplified: 'आपके लिए सरलीकृत।',
+    heroDesc1: 'सामाजिक कल्याण, आर्थिक विकास और कृषि को बढ़ाने के उद्देश्य से कार्यक्रमों की खोज करें।',
+    heroDesc2: 'अपनी भाषा में सर्वश्रेष्ठ योजनाएं खोजें।',
+    heroExploreBtn: 'योजनाएं खोजें',
+    phoneExploreTitle: 'योग्य योजनाएं खोजें',
+    phoneRecForYou: 'आपके लिए अनुशंसित',
+    phoneRecDesc: 'अपने क्षेत्र, आयु और लिंग के आधार पर प्रासंगिक योजनाएं खोजें।',
+    phoneAgri: 'कृषि',
+    phoneFin: 'वित्तीय समावेशन',
     applicantInfo: 'आवेदक की जानकारी',
     fillDetails: 'विवरण मैन्युअल रूप से भरें या वॉयस इनपुट का उपयोग करें',
     age: 'आयु (वर्ष)',
@@ -119,6 +177,25 @@ const translations: Record<string, TranslationSet> = {
     actionFallbackText: ', or you may qualify for {fallbackCode} instead which allows up to {fallbackLimit}',
   },
   'bn-IN': {
+    clearSavedData: 'Clear saved data',
+    downloadReport: 'Download Report',
+    youAreEligibleFor: 'You are eligible for',
+    schemesText: 'schemes',
+    heroHome: 'Home',
+    heroOfferings: 'Offerings',
+    heroSchemes: 'Schemes',
+    heroBharat: 'Bharat',
+    heroYojana: 'Yojana',
+    heroGovSchemes: 'Government Schemes,',
+    heroSimplified: 'Simplified for You.',
+    heroDesc1: 'Discover programmes aimed at enhancing social welfare, economic development, and agriculture.',
+    heroDesc2: 'Find the best schemes in your own language.',
+    heroExploreBtn: 'Explore Schemes',
+    phoneExploreTitle: 'Explore eligible schemes',
+    phoneRecForYou: 'Recommended for you',
+    phoneRecDesc: 'Find relevant schemes based on your region, age and gender.',
+    phoneAgri: 'Agriculture',
+    phoneFin: 'Financial Inclusion',
     applicantInfo: 'আবেদনকারীর তথ্য',
     fillDetails: 'ম্যানুয়ালি বিবরণ পূরণ করুন বা ভয়েস ইনপুট ব্যবহার করুন',
     age: 'বয়স (বছর)',
@@ -157,6 +234,25 @@ const translations: Record<string, TranslationSet> = {
     actionFallbackText: ', or you may qualify for {fallbackCode} instead which allows up to {fallbackLimit}',
   },
   'mr-IN': {
+    clearSavedData: 'Clear saved data',
+    downloadReport: 'Download Report',
+    youAreEligibleFor: 'You are eligible for',
+    schemesText: 'schemes',
+    heroHome: 'Home',
+    heroOfferings: 'Offerings',
+    heroSchemes: 'Schemes',
+    heroBharat: 'Bharat',
+    heroYojana: 'Yojana',
+    heroGovSchemes: 'Government Schemes,',
+    heroSimplified: 'Simplified for You.',
+    heroDesc1: 'Discover programmes aimed at enhancing social welfare, economic development, and agriculture.',
+    heroDesc2: 'Find the best schemes in your own language.',
+    heroExploreBtn: 'Explore Schemes',
+    phoneExploreTitle: 'Explore eligible schemes',
+    phoneRecForYou: 'Recommended for you',
+    phoneRecDesc: 'Find relevant schemes based on your region, age and gender.',
+    phoneAgri: 'Agriculture',
+    phoneFin: 'Financial Inclusion',
     applicantInfo: 'अर्जदाराची माहिती',
     fillDetails: 'तपशील स्वहस्ते भरा किंवा व्हॉइस इनपुट वापरा',
     age: 'वय (वर्षे)',
@@ -195,6 +291,25 @@ const translations: Record<string, TranslationSet> = {
     actionFallbackText: ', or you may qualify for {fallbackCode} instead which allows up to {fallbackLimit}',
   },
   'ta-IN': {
+    clearSavedData: 'Clear saved data',
+    downloadReport: 'Download Report',
+    youAreEligibleFor: 'You are eligible for',
+    schemesText: 'schemes',
+    heroHome: 'Home',
+    heroOfferings: 'Offerings',
+    heroSchemes: 'Schemes',
+    heroBharat: 'Bharat',
+    heroYojana: 'Yojana',
+    heroGovSchemes: 'Government Schemes,',
+    heroSimplified: 'Simplified for You.',
+    heroDesc1: 'Discover programmes aimed at enhancing social welfare, economic development, and agriculture.',
+    heroDesc2: 'Find the best schemes in your own language.',
+    heroExploreBtn: 'Explore Schemes',
+    phoneExploreTitle: 'Explore eligible schemes',
+    phoneRecForYou: 'Recommended for you',
+    phoneRecDesc: 'Find relevant schemes based on your region, age and gender.',
+    phoneAgri: 'Agriculture',
+    phoneFin: 'Financial Inclusion',
     applicantInfo: 'விண்ணப்பதாரர் தகவல்',
     fillDetails: 'விவரங்களை கைமுறையாக நிரப்பவும் அல்லது குரல் உள்ளீட்டைப் பயன்படுத்தவும்',
     age: 'வயது (ஆண்டுகள்)',
@@ -233,6 +348,25 @@ const translations: Record<string, TranslationSet> = {
     actionFallbackText: ', or you may qualify for {fallbackCode} instead which allows up to {fallbackLimit}',
   },
   'te-IN': {
+    clearSavedData: 'Clear saved data',
+    downloadReport: 'Download Report',
+    youAreEligibleFor: 'You are eligible for',
+    schemesText: 'schemes',
+    heroHome: 'Home',
+    heroOfferings: 'Offerings',
+    heroSchemes: 'Schemes',
+    heroBharat: 'Bharat',
+    heroYojana: 'Yojana',
+    heroGovSchemes: 'Government Schemes,',
+    heroSimplified: 'Simplified for You.',
+    heroDesc1: 'Discover programmes aimed at enhancing social welfare, economic development, and agriculture.',
+    heroDesc2: 'Find the best schemes in your own language.',
+    heroExploreBtn: 'Explore Schemes',
+    phoneExploreTitle: 'Explore eligible schemes',
+    phoneRecForYou: 'Recommended for you',
+    phoneRecDesc: 'Find relevant schemes based on your region, age and gender.',
+    phoneAgri: 'Agriculture',
+    phoneFin: 'Financial Inclusion',
     applicantInfo: 'దరఖాస్తుదారు సమాచారం',
     fillDetails: 'వివరాలను మాన్యువల్‌గా నింపండి లేదా వాయిస్ ఇన్‌పుట్ ఉపయోగించండి',
     age: 'వయసు (సంవత్సరాలు)',

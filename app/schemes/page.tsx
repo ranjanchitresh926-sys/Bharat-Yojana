@@ -21,7 +21,7 @@ export default function SchemesCatalogPage() {
             <Link 
               href={`/schemes/${scheme.code}`}
               key={scheme.id}
-              className="group bg-white rounded-md p-6 shadow-sm border border-gray-200 flex flex-col h-full hover:border-blue-300 transition-all relative overflow-hidden focus:outline-2 focus:outline-offset-2 focus:outline-blue-600 block"
+              className="group bg-white rounded-md p-6 shadow-sm border border-gray-200 flex flex-col h-full hover:border-blue-300 transition-all relative overflow-hidden focus:outline-2 focus:outline-offset-2 focus:outline-blue-600"
             >
               <div className="flex flex-wrap items-center gap-2 mb-4">
                 <span className="text-[11px] font-bold tracking-widest text-gray-500 uppercase bg-gray-100 px-2.5 py-1 rounded-full">{scheme.category}</span>
@@ -45,3 +45,9 @@ export default function SchemesCatalogPage() {
     </div>
   );
 }
+
+export const metadata = {
+  title: 'All Schemes - Bharat Yojana',
+  description: 'Browse the complete catalog of government schemes available on Bharat Yojana.'
+};
+

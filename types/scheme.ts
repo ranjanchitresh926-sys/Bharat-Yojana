@@ -16,12 +16,15 @@ export interface CitizenProfile {
 }
 
 export interface QuantitativeGap {
-  field: keyof CitizenProfile;
-  actual: number;
-  required: number;
-  delta: number;
+  field?: keyof CitizenProfile;
+  actual?: number;
+  required?: number;
+  delta?: number;
   message: string;
   actionable?: string;
+  /** True when this gap explains a categorical (non-numeric) AST failure —
+   * e.g. wrong state, wrong occupation — rather than a numeric threshold. */
+  isCategorical?: boolean;
 }
 
 /**
@@ -50,6 +53,11 @@ export interface Scheme {
   title: string;
   category: string;
   level: SchemeLevel;
+  /** Administering ministry, or 'State Government Schemes' for state-level
+   * schemes that don't sit under a single central ministry. This is the
+   * single source of truth for ministry filtering — don't maintain a
+   * separate lookup table elsewhere, it will drift out of sync. */
+  ministry: string;
   rulesAST: Record<string, any>;
   numericLimits: SchemeLimits;
   fallbackSchemeIds: string[];

@@ -35,7 +35,7 @@ const EXTERNAL_LINKS: Record<string, ExternalService[]> = {
 
 export default function GovFooter() {
   return (
-    <footer className="w-full bg-white border-t border-gray-200 mt-16 font-sans">
+    <footer className="print:hidden w-full bg-white border-t border-gray-200 mt-16 font-sans">
       {/* Related Government Services */}
       <div className="max-w-[1400px] mx-auto px-4 lg:px-8 py-10">
         <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6">Related Government Services (external)</h3>

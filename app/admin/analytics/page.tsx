@@ -1,14 +1,13 @@
-import React from 'react';
-import { cookies } from 'next/headers';
-import { notFound } from 'next/navigation';
-import AdminDashboard from './AdminDashboard';
+import React from "react";
+import { notFound } from "next/navigation";
+import AdminDashboard from "./AdminDashboard";
+import { auth } from "../../../auth";
 
 export default async function AnalyticsPage() {
-  const cookieStore = await cookies();
-  const role = cookieStore.get('userRole')?.value;
+  const session = await auth();
+  const role = session?.user?.role || "citizen";
 
-  // Double-gate Page Component Check
-  if (role !== 'admin') {
+  if (role !== "admin") {
     notFound();
   }
 

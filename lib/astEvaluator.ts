@@ -149,6 +149,21 @@ export class SchemeEngine {
     // json-logic-js applies rules on the given data object
     const astResult = jsonLogic.apply(scheme.rulesAST, profile as unknown as Record<string, unknown>);
 
+    // If the AST itself fails (wrong state, wrong occupation, wrong gender,
+    // etc.), that is the TRUE primary reason for ineligibility — surface it
+    // even when unrelated numeric gaps also exist, so the citizen never sees
+    // a numeric "gap" (e.g. income) as the reason when the real blocker is
+    // categorical (e.g. being a non-resident of a state-only scheme).
+    if (astResult !== true) {
+      const reasonText = SchemeEngine.astToText(scheme.rulesAST);
+      if (reasonText !== 'No specific categorical conditions apply') {
+        gaps.unshift({
+          message: `Does not meet eligibility criteria: ${reasonText}`,
+          isCategorical: true,
+        });
+      }
+    }
+
     const isEligible = astResult === true && gaps.length === 0;
 
     return {

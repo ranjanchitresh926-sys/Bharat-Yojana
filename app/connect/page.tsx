@@ -41,7 +41,7 @@ export default function ConnectPage() {
   return (
     <div className="min-h-screen bg-[#f1f5f9] flex flex-col font-sans">
       <GovHeader />
-      <main className="flex-1 max-w-[1400px] mx-auto w-full p-8">
+      <main id="main-content" className="flex-1 max-w-[1400px] mx-auto w-full p-8">
         <div className="grid md:grid-cols-2 gap-8">
 
           {/* Contact Info */}

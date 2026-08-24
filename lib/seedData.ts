@@ -27,6 +27,7 @@ export const SCHEME_DB: Scheme[] = [
     title: 'Pradhan Mantri Kisan Samman Nidhi',
     category: 'Agriculture',
     level: 'Central',
+    ministry: 'Ministry of Agriculture & Farmers Welfare',
     rulesAST: { '==': [{ var: 'occupation' }, 'Farmer'] },
     numericLimits: { maxLandholdingAcres: 4.94 },
     fallbackSchemeIds: ['scheme_3'],
@@ -37,6 +38,7 @@ export const SCHEME_DB: Scheme[] = [
     title: 'Mukhyamantri Kisan Kalyan Yojana',
     category: 'Agriculture',
     level: 'State',
+    ministry: 'State Government Schemes',
     rulesAST: {
       and: [
         { '==': [{ var: 'occupation' }, 'Farmer'] },
@@ -52,18 +54,23 @@ export const SCHEME_DB: Scheme[] = [
     title: 'Pradhan Mantri Fasal Bima Yojana',
     category: 'Agriculture',
     level: 'Central',
+    ministry: 'Ministry of Agriculture & Farmers Welfare',
     rulesAST: { '==': [{ var: 'occupation' }, 'Farmer'] },
     numericLimits: { maxLandholdingAcres: 25.0 },
     fallbackSchemeIds: ['scheme_1'],
   },
   // Source: https://www.pmuy.gov.in/about.html
   // SC/ST women are auto-eligible as a priority category without BPL card.
+  // No separate income ceiling is applied once a citizen qualifies via BPL
+  // status or SC/ST category — matching the AST, not contradicting it (see
+  // AYUSHMAN-BHARAT below for the same pattern).
   {
     id: 'scheme_4',
     code: 'PM-UJJWALA',
     title: 'Pradhan Mantri Ujjwala Yojana',
     category: 'Financial Inclusion',
     level: 'Central',
+    ministry: 'Ministry of Petroleum and Natural Gas',
     rulesAST: {
       and: [
         { '==': [{ var: 'gender' }, 'Female'] },
@@ -73,18 +80,21 @@ export const SCHEME_DB: Scheme[] = [
         ]},
       ],
     },
-    numericLimits: { maxIncome: 200000, minAge: 18 },
+    numericLimits: { minAge: 18 },
     fallbackSchemeIds: ['scheme_5'],
   },
   // Source: https://pmayg.nic.in/
   // SC/ST households have 60% reserved allocation; PwD households are
-  // also prioritised in beneficiary selection.
+  // also prioritised in beneficiary selection. As with PM-UJJWALA, no
+  // separate income ceiling is applied once a citizen qualifies via BPL,
+  // SC/ST category, or disability — the AST already gates on those.
   {
     id: 'scheme_5',
     code: 'PM-AWAS-GRAMIN',
     title: 'Pradhan Mantri Awas Yojana - Gramin',
     category: 'Housing',
     level: 'Central',
+    ministry: 'Ministry of Rural Development',
     rulesAST: {
       or: [
         { '==': [{ var: 'isBPLCardHolder' }, true] },
@@ -92,7 +102,7 @@ export const SCHEME_DB: Scheme[] = [
         { '==': [{ var: 'isDisabled' }, true] },
       ],
     },
-    numericLimits: { maxIncome: 300000 },
+    numericLimits: {},
     fallbackSchemeIds: [],
   },
   {
@@ -101,6 +111,7 @@ export const SCHEME_DB: Scheme[] = [
     title: 'Pradhan Mantri Jan Dhan Yojana',
     category: 'Financial Inclusion',
     level: 'Central',
+    ministry: 'Ministry of Finance',
     rulesAST: { '>=': [{ var: 'age' }, 10] },
     numericLimits: { minAge: 10, maxAge: 65 },
     fallbackSchemeIds: [],
@@ -111,6 +122,7 @@ export const SCHEME_DB: Scheme[] = [
     title: "PM Street Vendor's AtmaNirbhar Nidhi",
     category: 'Financial Inclusion',
     level: 'Central',
+    ministry: 'Ministry of Housing & Urban Affairs',
     rulesAST: {
       and: [
         { '==': [{ var: 'occupation' }, 'Street Vendor'] },
@@ -126,6 +138,7 @@ export const SCHEME_DB: Scheme[] = [
     title: 'Pradhan Mantri Suraksha Bima Yojana',
     category: 'Insurance',
     level: 'Central',
+    ministry: 'Ministry of Finance',
     rulesAST: {
       and: [
         { '>=': [{ var: 'age' }, 18] },
@@ -141,6 +154,7 @@ export const SCHEME_DB: Scheme[] = [
     title: 'Pradhan Mantri MUDRA Yojana',
     category: 'Financial Inclusion',
     level: 'Central',
+    ministry: 'Ministry of Finance',
     rulesAST: {
       and: [
         { '>=': [{ var: 'age' }, 18] },
@@ -156,6 +170,7 @@ export const SCHEME_DB: Scheme[] = [
     title: 'Sukanya Samriddhi Yojana',
     category: 'Women & Child Development',
     level: 'Central',
+    ministry: 'Ministry of Women & Child Development',
     rulesAST: { '==': [{ var: 'gender' }, 'Female'] },
     numericLimits: { maxAge: 10 },
     fallbackSchemeIds: [],
@@ -166,6 +181,7 @@ export const SCHEME_DB: Scheme[] = [
     title: 'Pradhan Mantri Kaushal Vikas Yojana',
     category: 'Education',
     level: 'Central',
+    ministry: 'Ministry of Skill Development and Entrepreneurship',
     rulesAST: {
       and: [
         { '>=': [{ var: 'age' }, 15] },
@@ -184,6 +200,7 @@ export const SCHEME_DB: Scheme[] = [
     title: 'Ayushman Bharat Pradhan Mantri Jan Arogya Yojana',
     category: 'Healthcare',
     level: 'Central',
+    ministry: 'Ministry of Health & Family Welfare',
     rulesAST: {
       or: [
         { '==': [{ var: 'isBPLCardHolder' }, true] },
@@ -201,7 +218,8 @@ export const SCHEME_DB: Scheme[] = [
     title: 'National Means-cum-Merit Scholarship Scheme',
     category: 'Education',
     level: 'Central',
-    rulesAST: { '==': [1, 1] },
+    ministry: 'Ministry of Education',
+    rulesAST: { '==': [{ var: 'occupation' }, 'Student'] },
     numericLimits: { maxIncome: 350000 },
     fallbackSchemeIds: [],
   },
@@ -213,7 +231,13 @@ export const SCHEME_DB: Scheme[] = [
     title: 'AICTE Pragati Scholarship for Girls',
     category: 'Education',
     level: 'Central',
-    rulesAST: { '==': [{ var: 'gender' }, 'Female'] },
+    ministry: 'Ministry of Education',
+    rulesAST: {
+      and: [
+        { '==': [{ var: 'gender' }, 'Female'] },
+        { '==': [{ var: 'occupation' }, 'Student'] },
+      ],
+    },
     numericLimits: { maxIncome: 800000 },
     fallbackSchemeIds: ['scheme_10'],
   },
@@ -225,6 +249,7 @@ export const SCHEME_DB: Scheme[] = [
     title: 'Indira Gandhi National Old Age Pension Scheme',
     category: 'Senior Citizen',
     level: 'Central',
+    ministry: 'Ministry of Rural Development',
     rulesAST: { '==': [{ var: 'isBPLCardHolder' }, true] },
     numericLimits: { minAge: 60 },
     fallbackSchemeIds: [],
@@ -237,6 +262,7 @@ export const SCHEME_DB: Scheme[] = [
     title: 'Indira Gandhi National Disability Pension Scheme',
     category: 'Disability',
     level: 'Central',
+    ministry: 'Ministry of Rural Development',
     rulesAST: {
       and: [
         { '==': [{ var: 'isBPLCardHolder' }, true] },
@@ -254,6 +280,7 @@ export const SCHEME_DB: Scheme[] = [
     title: 'Stand-Up India Scheme',
     category: 'MSME',
     level: 'Central',
+    ministry: 'Ministry of Finance',
     rulesAST: {
       or: [
         { in: [{ var: 'casteCategory' }, ['SC', 'ST']] },
@@ -271,6 +298,7 @@ export const SCHEME_DB: Scheme[] = [
     title: "Prime Minister's Employment Generation Programme",
     category: 'MSME',
     level: 'Central',
+    ministry: 'Ministry of Micro, Small and Medium Enterprises',
     rulesAST: { '==': [1, 1] },
     numericLimits: { minAge: 18 },
     fallbackSchemeIds: ['scheme_9'],
@@ -283,6 +311,7 @@ export const SCHEME_DB: Scheme[] = [
     title: 'Mahatma Jyotirao Pule Jan Arogya Yojana',
     category: 'Healthcare',
     level: 'State',
+    ministry: 'State Government Schemes',
     rulesAST: { '==': [{ var: 'state' }, 'Maharashtra'] },
     numericLimits: {},
     fallbackSchemeIds: ['scheme_12'],
@@ -295,6 +324,7 @@ export const SCHEME_DB: Scheme[] = [
     title: 'Mukhyamantri Kanya Sumangala Yojana',
     category: 'Women & Child Development',
     level: 'State',
+    ministry: 'State Government Schemes',
     rulesAST: {
       and: [
         { '==': [{ var: 'state' }, 'Uttar Pradesh'] },
@@ -312,6 +342,7 @@ export const SCHEME_DB: Scheme[] = [
     title: 'Assistance to Disabled Persons for Purchase/Fitting of Aids and Appliances',
     category: 'Disability',
     level: 'Central',
+    ministry: 'Ministry of Social Justice and Empowerment',
     rulesAST: { '==': [{ var: 'isDisabled' }, true] },
     numericLimits: { maxIncome: 360000 },
     fallbackSchemeIds: [],
@@ -324,6 +355,7 @@ export const SCHEME_DB: Scheme[] = [
     title: 'Mukhyamantri Vriddhjan Pension Yojana',
     category: 'Senior Citizen',
     level: 'State',
+    ministry: 'State Government Schemes',
     rulesAST: { '==': [{ var: 'state' }, 'Bihar'] },
     numericLimits: { minAge: 60 },
     fallbackSchemeIds: ['scheme_15'],

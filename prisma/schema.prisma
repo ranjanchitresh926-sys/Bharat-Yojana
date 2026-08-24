@@ -1,0 +1,39 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String
+  role         String   @default("officer") // 'officer' or 'admin'
+  createdAt    DateTime @default(now())
+}
+
+model Application {
+  id              String   @id @default(uuid())
+  citizenId       String?
+  schemeId        String
+  schemeTitle     String
+  profileSnapshot String   // JSON string
+  status          String
+  rejectionReason String?
+  submittedAt     DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Report {
+  id          String   @id @default(uuid())
+  schemeCode  String
+  description String
+  status      String   @default("pending")
+  receivedAt  DateTime @default(now())
+}
