@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { CitizenProfile, Scheme } from '../types/scheme';
 import { SchemeEngine } from '../lib/astEvaluator';
 import { getTranslations, TranslationSet } from '../lib/translations';
@@ -99,6 +100,16 @@ export default function Dashboard() {
         console.error('Failed to parse saved state', e);
       }
     }
+    
+    // Check if we came from another page with a search query
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const q = params.get('q');
+      if (q) {
+        setSearchQuery(q);
+        // Will be triggered by a useEffect down below once schemes are loaded
+      }
+    }
     setIsLoaded(true);
   }, []);
 
@@ -108,7 +119,7 @@ export default function Dashboard() {
     }
   }, [isLoaded, profile, results, hasSearched, searchQuery, selectedMinistry]);
 
-  // Listen for language changes
+  // Listen for language changes and cross-component search
   useEffect(() => {
     const updateLang = () => {
       const stored = localStorage.getItem('preferredLang') || 'en-IN';
@@ -117,7 +128,22 @@ export default function Dashboard() {
     };
     updateLang();
     window.addEventListener('languageChanged', updateLang);
-    return () => window.removeEventListener('languageChanged', updateLang);
+
+    const handleTriggerSearch = (e: any) => {
+      setSearchQuery(e.detail);
+      // We need to wait for state to settle, then run search.
+      // Easiest is to set a flag or just call a search function that reads the latest state.
+      // But we can just use a setTimeout to let React update the state first.
+      setTimeout(() => {
+        document.getElementById('run-search-btn')?.click();
+      }, 0);
+    };
+    window.addEventListener('triggerSearch', handleTriggerSearch);
+
+    return () => {
+      window.removeEventListener('languageChanged', updateLang);
+      window.removeEventListener('triggerSearch', handleTriggerSearch);
+    };
   }, []);
 
   // Fetch schemes from the API on mount
@@ -145,6 +171,18 @@ export default function Dashboard() {
     }
     fetchSchemes();
   }, []);
+
+  // Auto-search if q is present in URL and schemes are loaded
+  useEffect(() => {
+    if (!isLoading && schemes.length > 0 && typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('q')) {
+        setTimeout(() => {
+          document.getElementById('run-search-btn')?.click();
+        }, 0);
+      }
+    }
+  }, [isLoading, schemes.length]);
 
   const runSearch = () => {
     if (schemes.length === 0) return;
@@ -189,70 +227,120 @@ export default function Dashboard() {
     import('jspdf').then(({ default: jsPDF }) => {
       import('jspdf-autotable').then(({ default: autoTable }) => {
         const doc = new jsPDF();
-        doc.setFontSize(18);
-        doc.text('Bharat Yojana Eligibility Report', 14, 22);
+        const primaryColor: [number, number, number] = [11, 61, 145]; // #0B3D91
 
-        doc.setFontSize(12);
-        doc.setTextColor(100);
-        doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 30);
-        doc.setTextColor(0);
+        // Helper to format currency and remove rupees symbol which breaks jsPDF font
+        const formatCurrency = (val: number) => `Rs. ${(val || 0).toLocaleString('en-IN')}`;
+
+        // Header Background
+        doc.setFillColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+        doc.rect(0, 0, 210, 40, 'F');
+        
+        // Header Text
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(22);
+        doc.setFont('helvetica', 'bold');
+        doc.text('BHARAT YOJANA', 14, 20);
+        
+        doc.setFontSize(11);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Government Schemes, Simplified for You.', 14, 28);
+        
+        doc.setFontSize(10);
+        doc.setTextColor(200, 220, 255);
+        doc.text(`Eligibility Report - Generated on: ${new Date().toLocaleString()}`, 14, 35);
+
+        // Reset text color for body
+        doc.setTextColor(33, 33, 33);
 
         // Citizen Profile section
         doc.setFontSize(14);
-        doc.text('Citizen Profile', 14, 45);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Citizen Profile Overview', 14, 52);
+        
         autoTable(doc, {
-          startY: 50,
-          head: [['Field', 'Value']],
+          startY: 57,
+          head: [['Profile Attribute', 'Provided Value']],
           body: [
-            ['Age', String(profile.age)],
-            ['Annual Income', `Rs. ${profile.annualIncome}`],
+            ['Age', `${profile.age} Years`],
+            ['Annual Income', formatCurrency(profile.annualIncome)],
             ['Gender', profile.gender],
             ['Caste Category', profile.casteCategory],
             ['Occupation', profile.occupation || 'N/A'],
-            ['State', profile.state || 'N/A'],
-            ['Landholding (Acres)', String(profile.landholdingAcres)],
+            ['State of Residence', profile.state || 'N/A'],
+            ['Landholding', `${profile.landholdingAcres} Acres`],
             ['BPL Card Holder', profile.isBPLCardHolder ? 'Yes' : 'No'],
-            ['Disabled', profile.isDisabled ? 'Yes' : 'No'],
+            ['Disability Status', profile.isDisabled ? 'Yes (Disabled)' : 'No'],
           ],
-          margin: { left: 14 }
+          theme: 'grid',
+          headStyles: { fillColor: primaryColor, textColor: 255, fontStyle: 'bold' },
+          alternateRowStyles: { fillColor: [245, 248, 252] },
+          styles: { font: 'helvetica', fontSize: 10, cellPadding: 5 },
+          margin: { left: 14, right: 14 }
         });
 
         // Evaluation Results section
-        const finalY = (doc as any).lastAutoTable.finalY || 120;
-        doc.text('Evaluated Schemes', 14, finalY + 15);
+        const finalY = (doc as any).lastAutoTable.finalY || 130;
+        
+        doc.setFontSize(14);
+        doc.setFont('helvetica', 'bold');
+        doc.text('Scheme Evaluation Results', 14, finalY + 15);
 
         const tableData = results.map((result) => {
           const scheme = schemes.find(s => s.id === result.schemeId);
           if (!scheme) return [];
           const status = result.isEligible ? 'Eligible' : 'Not Eligible';
-          const gaps = result.quantitativeGaps.map((g: any) => g.message).join('; ');
-          return [scheme.code, scheme.title, status, gaps || 'None'];
+          
+          // Sanitize text to remove Rupee/unknown symbols which cause PDF font rendering issues
+          // Converts something like "?200000" or "¹ 200000" to "Rs. 2,00,000"
+          const rawGaps = result.quantitativeGaps.map((g: any) => g.message).join('\n');
+          const gaps = rawGaps.replace(/(?:₹|\?|¹\s*)(\d+)/g, (match: string, p1: string) => {
+            return `Rs. ${Number(p1).toLocaleString('en-IN')}`;
+          });
+
+          return [scheme.code, scheme.title, status, gaps || 'Meets all criteria'];
         }).filter(row => row.length > 0);
 
         autoTable(doc, {
           startY: finalY + 20,
-          head: [['Code', 'Scheme Name', 'Status', 'Gaps']],
+          head: [['Scheme Code', 'Scheme Name', 'Status', 'Eligibility Notes']],
           body: tableData,
-          margin: { left: 14 },
+          theme: 'striped',
+          headStyles: { fillColor: primaryColor, textColor: 255, fontStyle: 'bold' },
+          alternateRowStyles: { fillColor: [245, 248, 252] },
+          styles: { font: 'helvetica', fontSize: 9, cellPadding: 5, overflow: 'linebreak' },
           columnStyles: {
-            0: { cellWidth: 30 },
-            1: { cellWidth: 50 },
-            2: { cellWidth: 30 },
-            3: { cellWidth: 70 }
+            0: { cellWidth: 28, fontStyle: 'bold' },
+            1: { cellWidth: 52 },
+            2: { cellWidth: 26, fontStyle: 'bold' },
+            3: { cellWidth: 76 }
           },
-          didParseCell: function(data) {
+          didParseCell: function(data: any) {
             if (data.section === 'body' && data.column.index === 2) {
               if (data.cell.raw === 'Eligible') {
-                data.cell.styles.textColor = [0, 128, 0];
-                data.cell.styles.fontStyle = 'bold';
+                data.cell.styles.textColor = [34, 139, 34]; // Green
               } else {
-                data.cell.styles.textColor = [200, 0, 0];
+                data.cell.styles.textColor = [211, 47, 47]; // Red
               }
             }
           }
         });
+        
+        // Add footer with page numbers
+        const pageCount = (doc as any).internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+          doc.setPage(i);
+          doc.setFontSize(9);
+          doc.setTextColor(150);
+          doc.text(
+            `Page ${i} of ${pageCount} - Bharat Yojana Platform`, 
+            doc.internal.pageSize.getWidth() / 2, 
+            doc.internal.pageSize.getHeight() - 10,
+            { align: 'center' }
+          );
+        }
 
-        doc.save('scheme_eligibility_report.pdf');
+        doc.save('Bharat_Yojana_Eligibility_Report.pdf');
       });
     });
   };
@@ -267,18 +355,17 @@ export default function Dashboard() {
   }, {} as Record<string, number>);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-100/50 via-white to-green-100/50 flex flex-col font-sans">
+    <div className="min-h-screen bg-white flex flex-col font-sans">
       <GovHeader searchQuery={searchQuery} onSearchChange={setSearchQuery} />
       <LanguageSelector />
       
       <HeroBanner />
 
-
-      <main className="flex-1 max-w-[1400px] mx-auto w-full p-4 sm:p-6 lg:p-8 space-y-12">
+      <main id="main-content" className="flex-1 max-w-[1400px] mx-auto w-full p-4 sm:p-6 lg:p-8 space-y-12">
         
         {/* Intake Form Section */}
         <Reveal delay={100}>
-        <section id="applicant-info-section" className="bg-[#fcfbf7]/90 backdrop-blur-md rounded-xl shadow-lg border border-[#e2dfd2] overflow-hidden">
+        <section id="applicant-info-section" className="bg-[#fcfbf7] rounded-md shadow-sm border border-[#e2dfd2] overflow-hidden">
           <div className="border-b border-[#e2dfd2] px-6 py-4 bg-white/80 flex items-center justify-between">
             <h2 className="text-xl font-bold text-[#007b8f] tracking-tight">{t.applicantInfo}</h2>
             <p className="text-sm text-gray-500">{t.fillDetails}</p>
@@ -310,30 +397,30 @@ export default function Dashboard() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1.5">{t.age}<span className="text-red-500">*</span></label>
-                  <input type="number" value={profile.age} onChange={e => handleProfileChange('age', parseInt(e.target.value) || 0)} className="w-full p-2.5 bg-white border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none text-gray-900 transition-shadow" />
+                  <input type="number" value={profile.age} onChange={e => handleProfileChange('age', parseInt(e.target.value) || 0)} className="w-full p-2.5 bg-white border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 focus:outline-none text-gray-900 transition-shadow" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1.5">{t.annualIncome}<span className="text-red-500">*</span></label>
-                  <input type="number" value={profile.annualIncome} onChange={e => handleProfileChange('annualIncome', parseInt(e.target.value) || 0)} className="w-full p-2.5 bg-white border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none text-gray-900 transition-shadow" />
+                  <input type="number" value={profile.annualIncome} onChange={e => handleProfileChange('annualIncome', parseInt(e.target.value) || 0)} className="w-full p-2.5 bg-white border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 focus:outline-none text-gray-900 transition-shadow" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1.5">{t.state}</label>
-                  <input type="text" value={profile.state} onChange={e => handleProfileChange('state', e.target.value)} className="w-full p-2.5 bg-white border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none text-gray-900 transition-shadow" placeholder="e.g. Madhya Pradesh" />
+                  <input type="text" value={profile.state} onChange={e => handleProfileChange('state', e.target.value)} className="w-full p-2.5 bg-white border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 focus:outline-none text-gray-900 transition-shadow" placeholder="e.g. Madhya Pradesh" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1.5">{t.occupation}</label>
-                  <input type="text" value={profile.occupation} onChange={e => handleProfileChange('occupation', e.target.value)} className="w-full p-2.5 bg-white border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none text-gray-900 transition-shadow" placeholder="e.g. Farmer" />
+                  <input type="text" value={profile.occupation} onChange={e => handleProfileChange('occupation', e.target.value)} className="w-full p-2.5 bg-white border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 focus:outline-none text-gray-900 transition-shadow" placeholder="e.g. Farmer" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1.5">{t.landholding}</label>
-                  <input type="number" step="0.1" value={profile.landholdingAcres} onChange={e => handleProfileChange('landholdingAcres', parseFloat(e.target.value) || 0)} className="w-full p-2.5 bg-white border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none text-gray-900 transition-shadow" />
+                  <input type="number" step="0.1" value={profile.landholdingAcres} onChange={e => handleProfileChange('landholdingAcres', parseFloat(e.target.value) || 0)} className="w-full p-2.5 bg-white border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 focus:outline-none text-gray-900 transition-shadow" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1.5">{t.ministry}</label>
                   <select
                     value={selectedMinistry}
                     onChange={e => { setSelectedMinistry(e.target.value); setHasSearched(false); }}
-                    className="w-full p-2.5 bg-white border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 outline-none text-gray-900 transition-shadow"
+                    className="w-full p-2.5 bg-white border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 focus:outline-none text-gray-900 transition-shadow"
                   >
                     {MINISTRIES.map(m => (
                       <option key={m} value={m}>{m === 'All Ministries' ? t.allMinistries : m}</option>
@@ -403,9 +490,10 @@ export default function Dashboard() {
               {/* Search Schemes Button */}
               <div className="pt-6 border-t border-[#e2dfd2] flex flex-col sm:flex-row items-center gap-4">
                 <button
+                  id="run-search-btn"
                   onClick={runSearch}
                   disabled={isLoading}
-                  className="w-full sm:w-auto flex items-center justify-center gap-3 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-8 py-3.5 rounded-lg font-bold text-base shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full sm:w-auto flex items-center justify-center gap-3 bg-orange-600 hover:bg-orange-700 text-white px-8 py-3.5 rounded-md font-bold text-base shadow-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-2 focus:outline-offset-2 focus:outline-orange-800"
                 >
                   <Search size={20} />
                   {t.searchSchemes}
@@ -452,7 +540,7 @@ export default function Dashboard() {
             {isLoading && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {[1, 2, 3, 4, 5, 6].map(i => (
-                  <div key={i} className="bg-white rounded-2xl p-6 shadow-md border border-gray-200 animate-pulse">
+                  <div key={i} className="bg-white rounded-md p-6 shadow-sm border border-gray-200 animate-pulse">
                     <div className="flex gap-2 mb-4">
                       <div className="h-5 w-20 bg-gray-200 rounded-full"></div>
                       <div className="h-5 w-16 bg-gray-200 rounded-full"></div>
@@ -472,7 +560,7 @@ export default function Dashboard() {
 
             {/* Error State */}
             {fetchError && (
-              <div className="bg-red-50 border border-red-200 rounded-2xl p-8 text-center">
+              <div className="bg-red-50 border border-red-200 rounded-md p-8 text-center">
                 <AlertCircle size={32} className="text-red-400 mx-auto mb-3" />
                 <p className="text-red-700 font-semibold">Failed to load schemes</p>
                 <p className="text-red-500 text-sm mt-1">{fetchError}</p>
@@ -483,7 +571,7 @@ export default function Dashboard() {
             {!isLoading && !fetchError && (
               <>
                   {eligibleResults.length > 0 && (
-                    <div className="bg-green-50/80 border border-green-200 rounded-2xl p-6 mb-6">
+                    <div className="bg-green-50/80 border border-green-200 rounded-md p-6 mb-6">
                       <h3 className="text-lg font-bold text-green-900 mb-4 flex items-center gap-2">
                         <CheckCircle2 size={20} className="text-green-600" />
                         You are eligible for {eligibleResults.length} schemes
@@ -504,77 +592,80 @@ export default function Dashboard() {
                   const ministry = SCHEME_MINISTRY_MAP[scheme.code] || '';
                   
                   return (
-                    <div key={idx} className="bg-white rounded-2xl p-6 shadow-md border border-gray-200 flex flex-col h-full hover:shadow-xl transition-shadow relative overflow-hidden">
-                      <div className="flex flex-wrap items-center gap-2 mb-4">
-                        <span className="text-[11px] font-bold tracking-widest text-gray-500 uppercase bg-gray-100 px-2.5 py-1 rounded-full">{scheme.category}</span>
-                        <span className="text-[11px] font-bold tracking-widest text-blue-600 uppercase bg-blue-50 px-2.5 py-1 rounded-full">{scheme.level}</span>
-                      </div>
-                      
-                      <h3 className="text-xl font-bold text-gray-900 mb-1 leading-tight">{scheme.title}</h3>
-                      <p className="text-sm text-gray-500 mb-1 font-mono bg-gray-50 inline-block px-2 py-1 rounded border border-gray-100">{scheme.code}</p>
-                      {ministry && <p className="text-xs text-gray-400 mt-1 mb-4">{ministry}</p>}
-                      
-                      <div className="mt-auto pt-5 border-t border-gray-100">
-                        <div className="flex items-center justify-between mb-5">
-                          <span className="text-sm text-gray-500 font-semibold uppercase tracking-wider">{t.status}</span>
-                          {result.isEligible ? (
-                            <span className="flex items-center gap-1.5 bg-green-100 text-green-800 px-3.5 py-1.5 rounded-full text-sm font-bold shadow-sm">
-                              <CheckCircle2 size={16} /> {t.eligible}
-                            </span>
-                          ) : (
-                            <span className="flex items-center gap-1.5 bg-red-100 text-red-800 px-3.5 py-1.5 rounded-full text-sm font-bold shadow-sm">
-                              <XCircle size={16} /> {t.notEligible}
-                            </span>
+                    <div key={idx} className="bg-white rounded-md p-6 shadow-sm border border-gray-200 flex flex-col h-full transition-shadow relative overflow-hidden">
+                      <div className="flex-1 flex flex-col">
+                        <div className="flex flex-wrap items-center gap-2 mb-4">
+                          <span className="text-[11px] font-bold tracking-widest text-gray-500 uppercase bg-gray-100 px-2.5 py-1 rounded-full">{scheme.category}</span>
+                          <span className="text-[11px] font-bold tracking-widest text-blue-600 uppercase bg-blue-50 px-2.5 py-1 rounded-full">{scheme.level}</span>
+                        </div>
+                        
+                        <h3 className="text-xl font-bold text-gray-900 mb-1 leading-tight">{scheme.title}</h3>
+                        <p className="text-sm text-gray-500 mb-1 font-mono bg-gray-50 inline-block px-2 py-1 rounded border border-gray-100">{scheme.code}</p>
+                        {ministry && <p className="text-xs text-gray-400 mt-1 mb-4">{ministry}</p>}
+                        
+                        <div className="pt-4 mt-2 border-t border-gray-100">
+                          <div className="flex items-center justify-between mb-4">
+                            <span className="text-sm text-gray-500 font-semibold uppercase tracking-wider">{t.status}</span>
+                            {result.isEligible ? (
+                              <span className="flex items-center gap-1.5 bg-green-100 text-green-800 px-3.5 py-1.5 rounded-full text-sm font-bold shadow-sm">
+                                <CheckCircle2 size={16} /> {t.eligible}
+                              </span>
+                            ) : (
+                              <span className="flex items-center gap-1.5 bg-red-100 text-red-800 px-3.5 py-1.5 rounded-full text-sm font-bold shadow-sm">
+                                <XCircle size={16} /> {t.notEligible}
+                              </span>
+                            )}
+                          </div>
+
+                          {!result.isEligible && result.quantitativeGaps.length > 0 && (
+                            <div className="bg-red-50/80 rounded-xl p-4 space-y-3 border border-red-100 mb-4">
+                              <h4 className="text-[11px] font-extrabold text-red-800 uppercase tracking-widest flex items-center gap-1.5">
+                                <AlertCircle size={14} /> {t.gapAnalysis}
+                              </h4>
+                              {result.quantitativeGaps.map((gap: any, i: number) => (
+                                <div key={i} className="text-xs bg-white p-3 rounded-lg shadow-sm border border-red-50">
+                                  <span className="text-gray-800 font-medium block mb-1">{gap.message}</span>
+                                  {gap.actionable && (
+                                    <span className="text-blue-700 font-semibold block mb-2 leading-relaxed bg-blue-50 p-2 rounded">{gap.actionable}</span>
+                                  )}
+                                  <div className="flex items-center justify-between font-mono text-[11px] bg-gray-50 p-1.5 rounded">
+                                    <span className="text-gray-600">Actual: {gap.actual}</span>
+                                    <span className="text-green-600 font-bold">Req: {gap.required}</span>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+
+                          {!result.isEligible && result.suggestedFallbacks.length > 0 && (
+                            <div className="pt-1 border-gray-100 mb-4">
+                              <h4 className="text-[11px] font-extrabold text-gray-500 uppercase tracking-widest flex items-center gap-1.5 mb-3">
+                                <TrendingUp size={14} /> {t.alternativeSchemes}
+                              </h4>
+                              <div className="flex flex-wrap gap-2">
+                                {result.suggestedFallbacks.map((fallbackId: string) => {
+                                  const fallbackScheme = schemes.find(s => s.id === fallbackId);
+                                  return fallbackScheme ? (
+                                    <Link key={fallbackId} href={`/schemes/${fallbackScheme.code}`} className="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-full font-bold shadow-sm hover:bg-blue-100 transition-colors cursor-pointer focus:outline-2 focus:outline-offset-2 focus:outline-blue-600">
+                                      {fallbackScheme.code}
+                                    </Link>
+                                  ) : null;
+                                })}
+                              </div>
+                            </div>
                           )}
                         </div>
-
-                        {!result.isEligible && result.quantitativeGaps.length > 0 && (
-                          <div className="bg-red-50/80 rounded-xl p-4 space-y-3 border border-red-100">
-                            <h4 className="text-[11px] font-extrabold text-red-800 uppercase tracking-widest flex items-center gap-1.5">
-                              <AlertCircle size={14} /> {t.gapAnalysis}
-                            </h4>
-                            {result.quantitativeGaps.map((gap: any, i: number) => (
-                              <div key={i} className="text-xs bg-white p-3 rounded-lg shadow-sm border border-red-50">
-                                <span className="text-gray-800 font-medium block mb-1">{gap.message}</span>
-                                {gap.actionable && (
-                                  <span className="text-blue-700 font-semibold block mb-2 leading-relaxed bg-blue-50 p-2 rounded">{gap.actionable}</span>
-                                )}
-                                <div className="flex items-center justify-between font-mono text-[11px] bg-gray-50 p-1.5 rounded">
-                                  <span className="text-gray-600">Actual: {gap.actual}</span>
-                                  <span className="text-green-600 font-bold">Req: {gap.required}</span>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-
-                        {!result.isEligible && result.suggestedFallbacks.length > 0 && (
-                          <div className="mt-4 pt-4 border-t border-gray-100">
-                            <h4 className="text-[11px] font-extrabold text-gray-500 uppercase tracking-widest flex items-center gap-1.5 mb-3">
-                              <TrendingUp size={14} /> {t.alternativeSchemes}
-                            </h4>
-                            <div className="flex flex-wrap gap-2">
-                              {result.suggestedFallbacks.map((fallbackId: string) => {
-                                const fallbackScheme = schemes.find(s => s.id === fallbackId);
-                                return fallbackScheme ? (
-                                  <span key={fallbackId} className="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-full font-bold shadow-sm hover:bg-blue-100 transition-colors cursor-pointer">
-                                    {fallbackScheme.code}
-                                  </span>
-                                ) : null;
-                              })}
-                            </div>
-                          </div>
-                        )}
-                        <details className="group mt-4 pt-4 border-t border-gray-100">
-                            <summary className="cursor-pointer text-[12px] font-extrabold text-gray-500 uppercase tracking-widest flex items-center gap-1.5 list-none outline-none">
-                              <span className="text-[10px] group-open:rotate-90 transition-transform">▶</span> Why this result?
-                            </summary>
-                            <div className="mt-3 text-sm text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-200 leading-relaxed font-medium">
-                              <span className="block mb-1 text-xs text-gray-500 uppercase tracking-wider font-bold">Rules Evaluated:</span>
-                              {SchemeEngine.astToText(scheme.rulesAST)}
-                            </div>
-                        </details>
                       </div>
+
+                      <details className="group mt-4 pt-4 border-t border-gray-100">
+                          <summary className="cursor-pointer text-[12px] font-extrabold text-gray-500 uppercase tracking-widest flex items-center gap-1.5 list-none focus:outline-2 focus:outline-offset-2 focus:outline-blue-600">
+                            <span className="text-[10px] group-open:rotate-90 transition-transform">▶</span> Why this result?
+                          </summary>
+                          <div className="mt-3 text-sm text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-200 leading-relaxed font-medium">
+                            <span className="block mb-1 text-xs text-gray-500 uppercase tracking-wider font-bold">Rules Evaluated:</span>
+                            {SchemeEngine.astToText(scheme.rulesAST)}
+                          </div>
+                      </details>
                     </div>
                   );
                   })}

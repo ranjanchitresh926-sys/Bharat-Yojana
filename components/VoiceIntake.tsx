@@ -157,7 +157,7 @@ export default function VoiceIntake({ onProfileParsed, speakLabel, listeningLabe
 
       <button
         onClick={toggleRecording}
-        className={`p-6 rounded-full transition-all duration-300 mt-4 outline-none ${
+        className={`p-6 rounded-full transition-all duration-300 mt-4 focus:outline-2 focus:outline-offset-2 focus:outline-blue-800 ${
           isRecording
             ? 'bg-red-500 text-white animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.4)] scale-110'
             : 'bg-blue-600 text-white hover:bg-blue-700 hover:scale-105 hover:shadow-md'

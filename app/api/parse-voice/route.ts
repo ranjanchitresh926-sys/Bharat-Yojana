@@ -58,23 +58,25 @@ export async function POST(req: NextRequest) {
     const prompt = `You are an expert Indian Government Data Extraction Engine.
 Analyze the following citizen transcript (which may be in Hindi, Tamil, Telugu, Marathi, Bengali, or English) and extract the profile fields.
 
-Return ONLY a raw JSON object matching this exact schema, with no markdown code blocks (no \`\`\`json), no conversational filler, and no extra text:
+IMPORTANT INSTRUCTION: ONLY include fields in your JSON response that are EXPLICITLY mentioned or clearly implied in the transcript. If the user does not mention a field, OMIT IT ENTIRELY from the JSON object. Do not return null, and do NOT use default values for missing fields.
+
+Return ONLY a raw JSON object matching this partial schema, with no markdown code blocks (no \`\`\`json), no conversational filler, and no extra text:
 {
-  "age": number (default to 25 if not mentioned),
-  "annualIncome": number in INR (convert regional/colloquial terms like "5 lakh" to 500000, "50 thousand" to 50000),
-  "casteCategory": "General" | "OBC" | "SC" | "ST" (infer if mentioned, default to "General"),
-  "gender": "Male" | "Female" | "Other" (infer from context, default to "Male"),
-  "occupation": string (e.g., "Farmer", "Student", "Laborer", "Unemployed"),
-  "state": string (exact Indian state name, e.g., "Madhya Pradesh", "Uttar Pradesh", "Maharashtra", "Tamil Nadu"),
-  "landholdingAcres": number (convert local units or acres to a float number, default to 0),
-  "isBPLCardHolder": boolean (true if they mention BPL, ration card, or poverty line),
-  "isDisabled": boolean (true if disability is mentioned)
+  "age": number (only if mentioned),
+  "annualIncome": number in INR (convert regional terms like "5 lakh" to 500000, only if mentioned),
+  "casteCategory": "General" | "OBC" | "SC" | "ST" (only if mentioned),
+  "gender": "Male" | "Female" | "Other" (only if mentioned or clearly implied),
+  "occupation": string (only if mentioned, e.g., "Farmer", "Student"),
+  "state": string (exact Indian state name, only if mentioned),
+  "landholdingAcres": number (convert local units or acres to a float number, only if mentioned),
+  "isBPLCardHolder": boolean (true if they mention BPL/ration card, only if mentioned),
+  "isDisabled": boolean (true if disability is mentioned, only if mentioned)
 }
 
 Transcript to parse: "${text}"`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-3.6-flash',
+      model: 'gemini-3.1-flash-lite',
       contents: prompt,
     });
 

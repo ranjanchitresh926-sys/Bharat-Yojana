@@ -1,6 +1,7 @@
 export type CasteCategory = 'General' | 'OBC' | 'SC' | 'ST';
 export type Gender = 'Male' | 'Female' | 'Other';
 export type SchemeLevel = 'Central' | 'State';
+export type Role = 'citizen' | 'officer' | 'admin';
 
 export interface CitizenProfile {
   age: number;
@@ -59,4 +60,18 @@ export interface EligibilityResult {
   isEligible: boolean;
   quantitativeGaps: QuantitativeGap[];
   suggestedFallbacks: string[];
+}
+
+export type ApplicationStatus = 'Submitted' | 'Under Review' | 'Verified' | 'Approved' | 'Rejected';
+
+export interface Application {
+  id: string;
+  citizenId?: string;
+  schemeId: string; // The scheme code or id
+  schemeTitle: string;
+  profileSnapshot: CitizenProfile;
+  status: ApplicationStatus;
+  rejectionReason?: string;
+  submittedAt: string;
+  updatedAt: string;
 }
