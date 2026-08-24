@@ -42,11 +42,9 @@ export default function GovHeader({ searchQuery = "", onSearchChange }: GovHeade
       if (session?.user) {
         setSessionUser(session.user);
         setRole(session.user.role as Role);
-        document.cookie = `userRole=${session.user.role}; path=/`;
       } else {
         setSessionUser(null);
         setRole("citizen");
-        document.cookie = "userRole=citizen; path=/";
       }
       setMounted(true);
     });
@@ -84,7 +82,6 @@ export default function GovHeader({ searchQuery = "", onSearchChange }: GovHeade
     await signOut({ redirect: false });
     setSessionUser(null);
     setRole("citizen");
-    document.cookie = "userRole=citizen; path=/";
     router.push("/");
     router.refresh();
   };

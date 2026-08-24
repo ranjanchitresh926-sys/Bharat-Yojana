@@ -354,7 +354,7 @@ export default function Dashboard() {
         <Reveal delay={100}>
         <section id="applicant-info-section" className="bg-[#fcfbf7] rounded-md shadow-sm border border-[#e2dfd2] overflow-hidden">
           <div className="border-b border-[#e2dfd2] px-6 py-4 bg-white/80 flex items-center justify-between">
-            <h2 className="text-xl font-bold text-[#007b8f] tracking-tight">Step 1: Tell us about yourself</h2>
+            <h2 className="text-xl font-bold text-[#007b8f] tracking-tight">{t.step1Heading}</h2>
             <p className="text-sm text-gray-500">{t.fillDetails}</p>
           </div>
           
@@ -499,7 +499,7 @@ export default function Dashboard() {
           <section className="space-y-6 pt-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                  <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Step 2: See your matches</h2>
+                  <h2 className="text-2xl font-bold text-gray-900 tracking-tight">{t.step2Heading}</h2>
                   <span className="bg-blue-100 text-blue-800 text-sm py-1.5 px-4 rounded-full font-bold shadow-sm">{results.length} {t.schemesAnalyzed}</span>
                 </div>
                 <div className="flex items-center gap-3">

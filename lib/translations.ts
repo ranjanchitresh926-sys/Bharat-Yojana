@@ -25,6 +25,8 @@ export interface TranslationSet {
   phoneFin: string;
 
   applicantInfo: string;
+  step1Heading: string;
+  step2Heading: string;
   fillDetails: string;
   age: string;
   annualIncome: string;
@@ -83,6 +85,8 @@ const translations: Record<string, TranslationSet> = {
     phoneAgri: 'Agriculture',
     phoneFin: 'Financial Inclusion',
     applicantInfo: 'Applicant Information',
+    step1Heading: 'Step 1: Tell us about yourself',
+    step2Heading: 'Step 2: See your matches',
     fillDetails: 'Fill details manually or use voice input',
     age: 'Age (Years)',
     annualIncome: 'Annual Income (₹)',
@@ -140,6 +144,8 @@ const translations: Record<string, TranslationSet> = {
     phoneAgri: 'कृषि',
     phoneFin: 'वित्तीय समावेशन',
     applicantInfo: 'आवेदक की जानकारी',
+    step1Heading: 'चरण 1: अपने बारे में बताएं',
+    step2Heading: 'चरण 2: अपने मिलान देखें',
     fillDetails: 'विवरण मैन्युअल रूप से भरें या वॉयस इनपुट का उपयोग करें',
     age: 'आयु (वर्ष)',
     annualIncome: 'वार्षिक आय (₹)',
@@ -197,6 +203,8 @@ const translations: Record<string, TranslationSet> = {
     phoneAgri: 'Agriculture',
     phoneFin: 'Financial Inclusion',
     applicantInfo: 'আবেদনকারীর তথ্য',
+    step1Heading: 'ধাপ ১: নিজের সম্পর্কে বলুন',
+    step2Heading: 'ধাপ ২: আপনার মিল দেখুন',
     fillDetails: 'ম্যানুয়ালি বিবরণ পূরণ করুন বা ভয়েস ইনপুট ব্যবহার করুন',
     age: 'বয়স (বছর)',
     annualIncome: 'বার্ষিক আয় (₹)',
@@ -254,6 +262,8 @@ const translations: Record<string, TranslationSet> = {
     phoneAgri: 'Agriculture',
     phoneFin: 'Financial Inclusion',
     applicantInfo: 'अर्जदाराची माहिती',
+    step1Heading: 'पायरी 1: स्वतःबद्दल सांगा',
+    step2Heading: 'पायरी 2: तुमचे जुळणारे पर्याय पहा',
     fillDetails: 'तपशील स्वहस्ते भरा किंवा व्हॉइस इनपुट वापरा',
     age: 'वय (वर्षे)',
     annualIncome: 'वार्षिक उत्पन्न (₹)',
@@ -311,6 +321,8 @@ const translations: Record<string, TranslationSet> = {
     phoneAgri: 'Agriculture',
     phoneFin: 'Financial Inclusion',
     applicantInfo: 'விண்ணப்பதாரர் தகவல்',
+    step1Heading: 'படி 1: உங்களைப் பற்றி கூறுங்கள்',
+    step2Heading: 'படி 2: உங்கள் பொருத்தங்களைப் பாருங்கள்',
     fillDetails: 'விவரங்களை கைமுறையாக நிரப்பவும் அல்லது குரல் உள்ளீட்டைப் பயன்படுத்தவும்',
     age: 'வயது (ஆண்டுகள்)',
     annualIncome: 'ஆண்டு வருமானம் (₹)',
@@ -368,6 +380,8 @@ const translations: Record<string, TranslationSet> = {
     phoneAgri: 'Agriculture',
     phoneFin: 'Financial Inclusion',
     applicantInfo: 'దరఖాస్తుదారు సమాచారం',
+    step1Heading: 'దశ 1: మీ గురించి చెప్పండి',
+    step2Heading: 'దశ 2: మీ సరిపోలికలను చూడండి',
     fillDetails: 'వివరాలను మాన్యువల్‌గా నింపండి లేదా వాయిస్ ఇన్‌పుట్ ఉపయోగించండి',
     age: 'వయసు (సంవత్సరాలు)',
     annualIncome: 'వార్షిక ఆదాయం (₹)',
