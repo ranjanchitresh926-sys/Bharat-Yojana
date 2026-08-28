@@ -4,24 +4,46 @@ import React, { useEffect, useState } from 'react';
 import GovHeader from '../../components/GovHeader';
 import GovFooter from '../../components/GovFooter';
 import { Application } from '../../types/scheme';
-import { Check, X, Clock, AlertTriangle, ArrowRight } from 'lucide-react';
+import { Check, X, Clock, AlertTriangle, ArrowRight, MessageSquare } from 'lucide-react';
 
 export default function VerifyDashboard() {
   const [reports, setReports] = useState<any[]>([]);
   const [applications, setApplications] = useState<Application[]>([]);
+  const [feedback, setFeedback] = useState<any[]>([]);
+  const [grievances, setGrievances] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [rejectionReasons, setRejectionReasons] = useState<Record<string, string>>({});
 
   useEffect(() => {
     Promise.all([
       fetch('/api/reports').then(res => res.json()),
-      fetch('/api/applications').then(res => res.json())
-    ]).then(([reportsData, appsData]) => {
+      fetch('/api/applications').then(res => res.json()),
+      fetch('/api/feedback').then(res => res.json()),
+      fetch('/api/grievances').then(res => res.json())
+    ]).then(([reportsData, appsData, feedbackData, grievancesData]) => {
       setReports(reportsData.reports || []);
       setApplications(appsData.applications || []);
+      setFeedback(feedbackData.feedback || []);
+      setGrievances(grievancesData.grievances || []);
       setLoading(false);
     });
   }, []);
+
+  
+  const handleGrievanceAction = async (id: string, action: 'resolved') => {
+    try {
+      const res = await fetch('/api/grievances', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status: action })
+      });
+      if (res.ok) {
+        setGrievances(prev => prev.map(g => g.id === id ? { ...g, status: action } : g));
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   const handleReportAction = async (id: string, action: 'approve' | 'dismiss') => {
     try {
@@ -130,7 +152,7 @@ export default function VerifyDashboard() {
                               placeholder="Reason for rejection (optional)"
                               value={rejectionReasons[app.id] || ''}
                               onChange={(e) => setRejectionReasons(prev => ({...prev, [app.id]: e.target.value}))}
-                              className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded focus:outline-2 focus:outline-offset-2 focus:outline-red-600"
+                              className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded focus:outline-2 focus:outline-offset-2 focus:outline-red-600 text-black"
                             />
                             <button 
                               onClick={() => handleAppAction(app.id, 'Rejected')}
@@ -208,6 +230,91 @@ export default function VerifyDashboard() {
               ))}
             </div>
           )}
+        </div>
+
+        {/* Connect-Page Feedback Section (read-only — this channel has no
+            approve/dismiss workflow, it's general contact-form feedback) */}
+        <div className="bg-white rounded-md shadow-sm border border-gray-200 p-6 sm:p-8">
+          <div className="flex items-center gap-3 mb-6 border-b border-gray-200 pb-4">
+            <div className="bg-gray-600 text-white p-2 rounded">
+              <MessageSquare size={24} />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">Citizen Feedback</h2>
+              <p className="text-sm text-gray-500">Submissions from the Connect page contact form (read-only)</p>
+            </div>
+          </div>
+
+          {loading ? (
+            <div className="animate-pulse flex flex-col gap-4">
+              <div className="h-20 bg-gray-100 rounded-md"></div>
+            </div>
+          ) : feedback.length === 0 ? (
+            <div className="text-center py-12 text-gray-500 border border-dashed border-gray-300 rounded-md">
+              No feedback submitted yet.
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {feedback.map((f) => (
+                <div key={f.id} className="border border-gray-200 rounded-md p-4 bg-gray-50">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <span className="text-sm font-bold text-gray-900">{f.name}</span>
+                    <span className="text-xs text-gray-500">{f.email}</span>
+                    <span className="text-xs text-gray-500 flex items-center gap-1 ml-auto">
+                      <Clock size={12} /> {new Date(f.receivedAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-800 mt-2">{f.message}</p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+      
+        <div className="bg-white rounded-md shadow-sm border border-gray-200 p-6 sm:p-8 mt-8">
+          <div className="flex items-center gap-2 mb-6 border-b border-gray-100 pb-4">
+            <AlertTriangle className="text-amber-500" />
+            <h2 className="text-xl font-bold text-gray-900">Privacy Grievances</h2>
+            <span className="ml-auto bg-gray-100 text-gray-700 text-xs font-bold px-2 py-1 rounded-full">
+              {grievances.length} total
+            </span>
+          </div>
+
+          <div className="space-y-4">
+            {grievances.length === 0 ? (
+              <p className="text-sm text-gray-500 italic text-center py-8">No privacy grievances logged.</p>
+            ) : (
+              grievances.map(g => (
+                <div key={g.id} className="border border-gray-200 rounded-md p-4 bg-gray-50 flex flex-col sm:flex-row gap-4 justify-between items-start">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-sm font-bold text-gray-900">{g.requestType.toUpperCase()}</span>
+                      <span className="text-xs text-gray-500">{new Date(g.receivedAt).toLocaleDateString()}</span>
+                    </div>
+                    <p className="text-sm font-semibold text-gray-700 mb-1">{g.email}</p>
+                    <p className="text-sm text-gray-800 bg-white p-3 border border-gray-100 rounded-md mt-2">{g.details}</p>
+                  </div>
+                  <div className="flex items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+                    {g.status === 'pending' ? (
+                      <>
+                        <span className="text-xs font-bold px-2 py-1 bg-amber-100 text-amber-800 rounded uppercase">Pending</span>
+                        <button 
+                          onClick={() => handleGrievanceAction(g.id, 'resolved')}
+                          className="flex items-center justify-center p-1.5 bg-green-100 hover:bg-green-200 text-green-700 rounded transition-colors"
+                          title="Mark as Resolved"
+                        >
+                          <Check size={16} />
+                        </button>
+                      </>
+                    ) : (
+                      <span className="text-xs font-bold px-2 py-1 bg-gray-100 text-gray-500 rounded uppercase">Resolved</span>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
 
       </main>

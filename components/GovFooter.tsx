@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import Link from 'next/link';
 import { ExternalLink } from 'lucide-react';
 
 interface ExternalService {
@@ -78,7 +79,7 @@ export default function GovFooter() {
           <div className="flex flex-wrap items-center justify-center gap-2 text-sm text-gray-500 font-medium">
             <span>Copyright Policy</span>
             <span className="text-gray-300">|</span>
-            <span>Privacy Policy</span>
+            <Link href="/privacy" className="hover:underline focus:outline-1 focus:outline-offset-1 focus:outline-white rounded">Privacy Policy</Link>
             <span className="text-gray-300">|</span>
             <span>Terms and Conditions</span>
             <span className="text-gray-300">|</span>

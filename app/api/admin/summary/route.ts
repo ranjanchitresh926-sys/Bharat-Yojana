@@ -27,7 +27,7 @@ export async function GET(req: Request) {
 
   const schemeCodeCounts: Record<string, number> = {};
 
-  applications.forEach(app => {
+  applications.forEach((app: { status: string; schemeId: string }) => {
     if (statusCounts[app.status] !== undefined) {
       statusCounts[app.status]++;
     }
@@ -49,7 +49,7 @@ export async function GET(req: Request) {
     resolved: 0
   };
 
-  reports.forEach(report => {
+  reports.forEach((report: { status: string }) => {
     if (report.status === "pending") {
       reportCounts.pending++;
     } else {

@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Landmark, Search, LogOut } from "lucide-react";
 import { Role } from "../types/scheme";
 import { getSession, signOut } from "next-auth/react";
+import { getTranslations, TranslationSet } from "../lib/translations";
 
 interface GovHeaderProps {
   searchQuery?: string;
@@ -26,6 +27,7 @@ export default function GovHeader({ searchQuery = "", onSearchChange }: GovHeade
   const [mounted, setMounted] = useState(false);
   const [localSearch, setLocalSearch] = useState(searchQuery);
   const [sessionUser, setSessionUser] = useState<any>(null);
+  const [t, setT] = useState<TranslationSet>(getTranslations("en-IN"));
 
   useEffect(() => {
     setLocalSearch(searchQuery);
@@ -48,6 +50,17 @@ export default function GovHeader({ searchQuery = "", onSearchChange }: GovHeade
       }
       setMounted(true);
     });
+
+    const updateLang = () => {
+      const stored = localStorage.getItem('preferredLang') || 'en-IN';
+      setT(getTranslations(stored));
+    };
+    updateLang();
+    window.addEventListener('languageChanged', updateLang);
+
+    return () => {
+      window.removeEventListener('languageChanged', updateLang);
+    };
   }, []);
 
   const changeFontSize = (size: string) => {
@@ -87,22 +100,25 @@ export default function GovHeader({ searchQuery = "", onSearchChange }: GovHeade
   };
 
   const NAV_ITEMS = [
-    { label: "Home", href: "/" },
-    { label: "Offerings / Schemes", href: "/schemes" },
+    { label: t.navHome, href: "/" },
+    { label: t.navSchemes, href: "/schemes" },
   ];
 
-  if (role === "citizen" || role === "admin") {
-    NAV_ITEMS.push({ label: "My Dashboard", href: "/dashboard" });
+  if (role === "citizen") {
+    NAV_ITEMS.push({ label: t.navDashboard, href: "/dashboard" });
   }
 
-  NAV_ITEMS.push({ label: "Connect", href: "/connect" });
+  if (role !== "admin") {
+    NAV_ITEMS.push({ label: t.navConnect, href: "/connect" });
+  }
 
-  if (role === "officer" || role === "admin") {
-    NAV_ITEMS.push({ label: "Verify Reports", href: "/verify" });
+  if (role === "officer") {
+    NAV_ITEMS.push({ label: t.navVerify, href: "/verify" });
   }
 
   if (role === "admin") {
-    NAV_ITEMS.push({ label: "Admin Analytics", href: "/admin/analytics" });
+    NAV_ITEMS.push({ label: t.navFeedback, href: "/admin/feedback" });
+    NAV_ITEMS.push({ label: t.navAnalytics, href: "/admin/analytics" });
   }
 
   const isActive = (item: typeof NAV_ITEMS[number]) => {
@@ -138,7 +154,7 @@ export default function GovHeader({ searchQuery = "", onSearchChange }: GovHeade
                   if (onSearchChange) onSearchChange(e.target.value);
                 }}
                 onKeyDown={handleKeyDown}
-                placeholder="Search schemes by name, category, or code... (Press Enter)"
+                placeholder={`${t.schemesText} (Press Enter)`}
                 className="w-full pl-11 pr-4 py-2 border border-blue-300/40 rounded-md focus:outline-2 focus:outline-offset-2 focus:outline-white bg-[#0a3580] text-white placeholder-blue-300/60 text-sm transition-all"
               />
               <Search className="absolute left-4 top-2.5 text-blue-300/60 group-focus-within:text-white transition-colors" size={16} />

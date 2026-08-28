@@ -73,7 +73,7 @@ export async function GET() {
     orderBy: { receivedAt: "desc" }
   });
 
-  const reports = dbReports.map(r => ({
+  const reports = dbReports.map((r: any) => ({
     id: r.id,
     schemeCode: r.schemeCode,
     description: r.description,

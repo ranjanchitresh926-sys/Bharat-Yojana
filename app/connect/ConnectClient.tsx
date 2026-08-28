@@ -111,7 +111,7 @@ export default function ConnectPage() {
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                     placeholder="Your name"
-                    className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-2 focus:outline-offset-2 focus:outline-blue-600 focus:border-blue-500 text-sm transition-colors"
+                    className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-2 focus:outline-offset-2 focus:outline-blue-600 focus:border-blue-500 text-sm transition-colors text-black"
                   />
                 </div>
                 <div>
@@ -125,7 +125,7 @@ export default function ConnectPage() {
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
                     placeholder="you@example.com"
-                    className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-2 focus:outline-offset-2 focus:outline-blue-600 focus:border-blue-500 text-sm transition-colors"
+                    className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-2 focus:outline-offset-2 focus:outline-blue-600 focus:border-blue-500 text-sm transition-colors text-black"
                   />
                 </div>
                 <div>
@@ -139,7 +139,7 @@ export default function ConnectPage() {
                     value={form.message}
                     onChange={(e) => setForm({ ...form, message: e.target.value })}
                     placeholder="Tell us what you think..."
-                    className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-2 focus:outline-offset-2 focus:outline-blue-600 focus:border-blue-500 text-sm transition-colors resize-none"
+                    className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg focus:outline-2 focus:outline-offset-2 focus:outline-blue-600 focus:border-blue-500 text-sm transition-colors resize-none text-black"
                   />
                 </div>
 

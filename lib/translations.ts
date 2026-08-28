@@ -4,6 +4,16 @@
 export type LangCode = 'en-IN' | 'hi-IN' | 'bn-IN' | 'mr-IN' | 'ta-IN' | 'te-IN';
 
 export interface TranslationSet {
+  navHome: string;
+  navSchemes: string;
+  navDashboard: string;
+  navConnect: string;
+  navVerify: string;
+  navAnalytics: string;
+  navFeedback: string;
+  navSignIn: string;
+  navSignOut: string;
+
   clearSavedData: string;
   downloadReport: string;
   youAreEligibleFor: string;
@@ -27,6 +37,9 @@ export interface TranslationSet {
   applicantInfo: string;
   step1Heading: string;
   step2Heading: string;
+  stepIndicator1: string;
+  stepIndicator2: string;
+  stepIndicator3: string;
   fillDetails: string;
   age: string;
   annualIncome: string;
@@ -65,6 +78,15 @@ export interface TranslationSet {
 
 const translations: Record<string, TranslationSet> = {
   'en-IN': {
+    navHome: 'Home',
+    navSchemes: 'Offerings / Schemes',
+    navDashboard: 'My Dashboard',
+    navConnect: 'Connect',
+    navVerify: 'Verify Reports',
+    navAnalytics: 'Admin Analytics',
+    navFeedback: 'Feedback',
+    navSignIn: 'Sign In',
+    navSignOut: 'Sign Out',
     clearSavedData: 'Clear saved data',
     downloadReport: 'Download Report',
     youAreEligibleFor: 'You are eligible for',
@@ -87,6 +109,9 @@ const translations: Record<string, TranslationSet> = {
     applicantInfo: 'Applicant Information',
     step1Heading: 'Step 1: Tell us about yourself',
     step2Heading: 'Step 2: See your matches',
+    stepIndicator1: 'Tell us about yourself',
+    stepIndicator2: 'See your matches',
+    stepIndicator3: 'View Scheme',
     fillDetails: 'Fill details manually or use voice input',
     age: 'Age (Years)',
     annualIncome: 'Annual Income (₹)',
@@ -124,6 +149,15 @@ const translations: Record<string, TranslationSet> = {
     actionFallbackText: ', or you may qualify for {fallbackCode} instead which allows up to {fallbackLimit}',
   },
   'hi-IN': {
+    navHome: 'होम',
+    navSchemes: 'योजनाएं',
+    navDashboard: 'मेरा डैशबोर्ड',
+    navConnect: 'संपर्क',
+    navVerify: 'रिपोर्ट सत्यापित करें',
+    navAnalytics: 'एडमिन एनालिटिक्स',
+    navFeedback: 'प्रतिक्रिया',
+    navSignIn: 'साइन इन',
+    navSignOut: 'साइन आउट',
     clearSavedData: 'सहेजा गया डेटा साफ़ करें',
     downloadReport: 'रिपोर्ट डाउनलोड करें',
     youAreEligibleFor: 'आप योग्य हैं',
@@ -146,6 +180,9 @@ const translations: Record<string, TranslationSet> = {
     applicantInfo: 'आवेदक की जानकारी',
     step1Heading: 'चरण 1: अपने बारे में बताएं',
     step2Heading: 'चरण 2: अपने मिलान देखें',
+    stepIndicator1: 'अपने बारे में बताएं',
+    stepIndicator2: 'अपने मिलान देखें',
+    stepIndicator3: 'योजना देखें',
     fillDetails: 'विवरण मैन्युअल रूप से भरें या वॉयस इनपुट का उपयोग करें',
     age: 'आयु (वर्ष)',
     annualIncome: 'वार्षिक आय (₹)',
@@ -183,6 +220,15 @@ const translations: Record<string, TranslationSet> = {
     actionFallbackText: ', or you may qualify for {fallbackCode} instead which allows up to {fallbackLimit}',
   },
   'bn-IN': {
+    navHome: 'হোম',
+    navSchemes: 'স্কিমগুলি',
+    navDashboard: 'আমার ড্যাশবোর্ড',
+    navConnect: 'যোগাযোগ',
+    navVerify: 'রিপোর্ট যাচাই করুন',
+    navAnalytics: 'অ্যাডমিন অ্যানালিটিক্স',
+    navFeedback: 'মতামত',
+    navSignIn: 'সাইন ইন',
+    navSignOut: 'সাইন আউট',
     clearSavedData: 'Clear saved data',
     downloadReport: 'Download Report',
     youAreEligibleFor: 'You are eligible for',
@@ -205,6 +251,9 @@ const translations: Record<string, TranslationSet> = {
     applicantInfo: 'আবেদনকারীর তথ্য',
     step1Heading: 'ধাপ ১: নিজের সম্পর্কে বলুন',
     step2Heading: 'ধাপ ২: আপনার মিল দেখুন',
+    stepIndicator1: 'নিজের সম্পর্কে বলুন',
+    stepIndicator2: 'আপনার মিল দেখুন',
+    stepIndicator3: 'প্রকল্প দেখুন',
     fillDetails: 'ম্যানুয়ালি বিবরণ পূরণ করুন বা ভয়েস ইনপুট ব্যবহার করুন',
     age: 'বয়স (বছর)',
     annualIncome: 'বার্ষিক আয় (₹)',
@@ -242,6 +291,15 @@ const translations: Record<string, TranslationSet> = {
     actionFallbackText: ', or you may qualify for {fallbackCode} instead which allows up to {fallbackLimit}',
   },
   'mr-IN': {
+    navHome: 'होम',
+    navSchemes: 'योजना',
+    navDashboard: 'माझा डॅशबोर्ड',
+    navConnect: 'संपर्क',
+    navVerify: 'अहवाल सत्यापित करा',
+    navAnalytics: 'अ‍ॅडमिन अ‍ॅनालिटिक्स',
+    navFeedback: 'अभिप्राय',
+    navSignIn: 'साइन इन करा',
+    navSignOut: 'साइन आउट करा',
     clearSavedData: 'Clear saved data',
     downloadReport: 'Download Report',
     youAreEligibleFor: 'You are eligible for',
@@ -264,6 +322,9 @@ const translations: Record<string, TranslationSet> = {
     applicantInfo: 'अर्जदाराची माहिती',
     step1Heading: 'पायरी 1: स्वतःबद्दल सांगा',
     step2Heading: 'पायरी 2: तुमचे जुळणारे पर्याय पहा',
+    stepIndicator1: 'स्वतःबद्दल सांगा',
+    stepIndicator2: 'तुमचे जुळणारे पर्याय पहा',
+    stepIndicator3: 'योजना पहा',
     fillDetails: 'तपशील स्वहस्ते भरा किंवा व्हॉइस इनपुट वापरा',
     age: 'वय (वर्षे)',
     annualIncome: 'वार्षिक उत्पन्न (₹)',
@@ -301,6 +362,15 @@ const translations: Record<string, TranslationSet> = {
     actionFallbackText: ', or you may qualify for {fallbackCode} instead which allows up to {fallbackLimit}',
   },
   'ta-IN': {
+    navHome: 'முகப்பு',
+    navSchemes: 'திட்டங்கள்',
+    navDashboard: 'என் டாஷ்போர்டு',
+    navConnect: 'தொடர்பு',
+    navVerify: 'அறிக்கைகளை சரிபார்க்கவும்',
+    navAnalytics: 'நிர்வாக பகுப்பாய்வு',
+    navFeedback: 'பின்னூட்டம்',
+    navSignIn: 'உள்நுழைக',
+    navSignOut: 'வெளியேறு',
     clearSavedData: 'Clear saved data',
     downloadReport: 'Download Report',
     youAreEligibleFor: 'You are eligible for',
@@ -323,6 +393,9 @@ const translations: Record<string, TranslationSet> = {
     applicantInfo: 'விண்ணப்பதாரர் தகவல்',
     step1Heading: 'படி 1: உங்களைப் பற்றி கூறுங்கள்',
     step2Heading: 'படி 2: உங்கள் பொருத்தங்களைப் பாருங்கள்',
+    stepIndicator1: 'உங்களைப் பற்றி கூறுங்கள்',
+    stepIndicator2: 'உங்கள் பொருத்தங்களைப் பாருங்கள்',
+    stepIndicator3: 'திட்டத்தைப் பார்க்கவும்',
     fillDetails: 'விவரங்களை கைமுறையாக நிரப்பவும் அல்லது குரல் உள்ளீட்டைப் பயன்படுத்தவும்',
     age: 'வயது (ஆண்டுகள்)',
     annualIncome: 'ஆண்டு வருமானம் (₹)',
@@ -360,6 +433,15 @@ const translations: Record<string, TranslationSet> = {
     actionFallbackText: ', or you may qualify for {fallbackCode} instead which allows up to {fallbackLimit}',
   },
   'te-IN': {
+    navHome: 'హోమ్',
+    navSchemes: 'పథకాలు',
+    navDashboard: 'నా డాష్‌బోర్డ్',
+    navConnect: 'కనెక్ట్',
+    navVerify: 'నివేదికలను ధృవీకరించండి',
+    navAnalytics: 'అడ్మిన్ విశ్లేషణలు',
+    navFeedback: 'అభిప్రాయం',
+    navSignIn: 'సైన్ ఇన్',
+    navSignOut: 'సైన్ అవుట్',
     clearSavedData: 'Clear saved data',
     downloadReport: 'Download Report',
     youAreEligibleFor: 'You are eligible for',
@@ -382,6 +464,9 @@ const translations: Record<string, TranslationSet> = {
     applicantInfo: 'దరఖాస్తుదారు సమాచారం',
     step1Heading: 'దశ 1: మీ గురించి చెప్పండి',
     step2Heading: 'దశ 2: మీ సరిపోలికలను చూడండి',
+    stepIndicator1: 'మీ గురించి చెప్పండి',
+    stepIndicator2: 'మీ సరిపోలికలను చూడండి',
+    stepIndicator3: 'పథకాన్ని చూడండి',
     fillDetails: 'వివరాలను మాన్యువల్‌గా నింపండి లేదా వాయిస్ ఇన్‌పుట్ ఉపయోగించండి',
     age: 'వయసు (సంవత్సరాలు)',
     annualIncome: 'వార్షిక ఆదాయం (₹)',

@@ -37,3 +37,29 @@ model Report {
   status      String   @default("pending")
   receivedAt  DateTime @default(now())
 }
+
+model Feedback {
+  id         String   @id @default(uuid())
+  name       String
+  email      String
+  message    String
+  receivedAt DateTime @default(now())
+}
+
+model ConsentRecord {
+  id            String    @id @default(uuid())
+  citizenId     String
+  purpose       String
+  noticeVersion String
+  consentedAt   DateTime  @default(now())
+  withdrawnAt   DateTime?
+}
+
+model GrievanceRecord {
+  id          String   @id @default(uuid())
+  email       String
+  requestType String
+  details     String
+  status      String   @default("pending")
+  receivedAt  DateTime @default(now())
+}

@@ -215,7 +215,6 @@ export default function AdminDashboard() {
                 <div className="text-center py-8 text-gray-500">All schemes have at least one tracked application. Excellent coverage!</div>
               )}
             </div>
-
           </div>
         ) : null}
       </main>

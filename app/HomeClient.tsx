@@ -6,7 +6,6 @@ import { CitizenProfile, Scheme } from '../types/scheme';
 import { SchemeEngine } from '../lib/astEvaluator';
 import { getTranslations, TranslationSet } from '../lib/translations';
 import VoiceIntake from '../components/VoiceIntake';
-import LanguageSelector from '../components/LanguageSelector';
 import GovHeader from '../components/GovHeader';
 import HeroBanner from '../components/HeroBanner';
 import GovFooter from '../components/GovFooter';
@@ -333,8 +332,9 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen bg-white flex flex-col font-sans">
       <GovHeader searchQuery={searchQuery} onSearchChange={setSearchQuery} />
-      <LanguageSelector />
-      
+      {/* LanguageSelector is now mounted globally in app/layout.tsx so it
+          works from every page, not just this one. */}
+
       <HeroBanner />
 
       <main id="main-content" className="flex-1 max-w-[1400px] mx-auto w-full p-4 sm:p-6 lg:p-8 space-y-12">
@@ -342,11 +342,11 @@ export default function Dashboard() {
         {/* Step Indicator */}
         <div className="flex justify-center mb-2 overflow-hidden">
           <div className="flex items-center space-x-2 sm:space-x-4 text-xs sm:text-sm font-bold">
-            <span className="flex items-center text-[#0B3D91]"><span className="w-6 h-6 rounded-full bg-[#0B3D91] text-white flex items-center justify-center mr-2">1</span> Tell us about yourself</span>
+            <span className="flex items-center text-[#0B3D91]"><span className="w-6 h-6 rounded-full bg-[#0B3D91] text-white flex items-center justify-center mr-2">1</span> {t.stepIndicator1}</span>
             <span className="w-6 sm:w-12 h-px bg-gray-300"></span>
-            <span className={`flex items-center ${hasSearched ? 'text-[#0B3D91]' : 'text-gray-400'}`}><span className={`w-6 h-6 rounded-full flex items-center justify-center mr-2 ${hasSearched ? 'bg-[#0B3D91] text-white' : 'bg-gray-200 text-gray-500'}`}>2</span> See your matches</span>
+            <span className={`flex items-center ${hasSearched ? 'text-[#0B3D91]' : 'text-gray-400'}`}><span className={`w-6 h-6 rounded-full flex items-center justify-center mr-2 ${hasSearched ? 'bg-[#0B3D91] text-white' : 'bg-gray-200 text-gray-500'}`}>2</span> {t.stepIndicator2}</span>
             <span className="w-6 sm:w-12 h-px bg-gray-300"></span>
-            <span className="flex items-center text-gray-400"><span className="w-6 h-6 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center mr-2">3</span> View Scheme</span>
+            <span className="flex items-center text-gray-400"><span className="w-6 h-6 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center mr-2">3</span> {t.stepIndicator3}</span>
           </div>
         </div>
 
@@ -384,23 +384,23 @@ export default function Dashboard() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1.5">{t.age}<span className="text-red-500">*</span></label>
-                  <input type="number" value={profile.age} onChange={e => handleProfileChange('age', parseInt(e.target.value) || 0)} className="w-full p-2.5 bg-white border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 focus:outline-none text-gray-900 transition-shadow" />
+                  <input type="number" value={profile.age} onChange={e => handleProfileChange('age', parseInt(e.target.value) || 0)} className="w-full p-2.5 bg-white border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 focus:outline-none text-black transition-shadow" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1.5">{t.annualIncome}<span className="text-red-500">*</span></label>
-                  <input type="number" value={profile.annualIncome} onChange={e => handleProfileChange('annualIncome', parseInt(e.target.value) || 0)} className="w-full p-2.5 bg-white border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 focus:outline-none text-gray-900 transition-shadow" />
+                  <input type="number" value={profile.annualIncome} onChange={e => handleProfileChange('annualIncome', parseInt(e.target.value) || 0)} className="w-full p-2.5 bg-white border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 focus:outline-none text-black transition-shadow" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1.5">{t.state}</label>
-                  <input type="text" value={profile.state} onChange={e => handleProfileChange('state', e.target.value)} className="w-full p-2.5 bg-white border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 focus:outline-none text-gray-900 transition-shadow" placeholder="e.g. Madhya Pradesh" />
+                  <input type="text" value={profile.state} onChange={e => handleProfileChange('state', e.target.value)} className="w-full p-2.5 bg-white border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 focus:outline-none text-black transition-shadow" placeholder="e.g. Madhya Pradesh" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1.5">{t.occupation}</label>
-                  <input type="text" value={profile.occupation} onChange={e => handleProfileChange('occupation', e.target.value)} className="w-full p-2.5 bg-white border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 focus:outline-none text-gray-900 transition-shadow" placeholder="e.g. Farmer" />
+                  <input type="text" value={profile.occupation} onChange={e => handleProfileChange('occupation', e.target.value)} className="w-full p-2.5 bg-white border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 focus:outline-none text-black transition-shadow" placeholder="e.g. Farmer" />
                 </div>
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-1.5">{t.landholding}</label>
-                  <input type="number" step="0.1" value={profile.landholdingAcres} onChange={e => handleProfileChange('landholdingAcres', parseFloat(e.target.value) || 0)} className="w-full p-2.5 bg-white border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 focus:outline-none text-gray-900 transition-shadow" />
+                  <input type="number" step="0.1" value={profile.landholdingAcres} onChange={e => handleProfileChange('landholdingAcres', parseFloat(e.target.value) || 0)} className="w-full p-2.5 bg-white border border-gray-300 rounded focus:ring-1 focus:ring-orange-500 focus:border-orange-500 focus:outline-none text-black transition-shadow" />
                 </div>
               </div>
 
@@ -450,14 +450,14 @@ export default function Dashboard() {
                   <div className={`w-5 h-5 rounded flex items-center justify-center border transition-all ${profile.isBPLCardHolder ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-400 group-hover:border-blue-500'}`}>
                     {profile.isBPLCardHolder && <CheckCircle2 size={14} className="text-white" />}
                   </div>
-                  <input type="checkbox" className="hidden" checked={profile.isBPLCardHolder} onChange={e => handleProfileChange('isBPLCardHolder', e.target.checked)} />
+                  <input type="checkbox" className="hidden text-black" checked={profile.isBPLCardHolder} onChange={e => handleProfileChange('isBPLCardHolder', e.target.checked)} />
                   <span className="text-sm font-semibold text-gray-700">{t.bplCardHolder}</span>
                 </label>
                 <label className="flex items-center gap-2.5 cursor-pointer group">
                   <div className={`w-5 h-5 rounded flex items-center justify-center border transition-all ${profile.isDisabled ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-400 group-hover:border-blue-500'}`}>
                     {profile.isDisabled && <CheckCircle2 size={14} className="text-white" />}
                   </div>
-                  <input type="checkbox" className="hidden" checked={profile.isDisabled} onChange={e => handleProfileChange('isDisabled', e.target.checked)} />
+                  <input type="checkbox" className="hidden text-black" checked={profile.isDisabled} onChange={e => handleProfileChange('isDisabled', e.target.checked)} />
                   <span className="text-sm font-semibold text-gray-700">{t.differentlyAbled}</span>
                 </label>
               </div>

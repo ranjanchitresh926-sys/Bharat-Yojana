@@ -1,12 +1,8 @@
 import React from 'react';
-import { Metadata } from 'next';
 
-export const metadata: Metadata = {
-  title: 'Dashboard - Bharat Yojana',
-  description: 'View your saved and tracked scheme applications.',
-};
-
+// Metadata for this route lives in page.tsx (it needs to be more specific
+// than this layout's, and Next.js only needs one source of truth — having
+// it in both places here previously was redundant and confusing).
 export default function Layout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
-
