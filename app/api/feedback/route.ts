@@ -68,9 +68,9 @@ export async function GET() {
   const session = await auth();
   const role = session?.user?.role || "citizen";
 
-  if (role !== "admin") {
+  if (role !== "officer" && role !== "admin") {
     return NextResponse.json(
-      { error: "Forbidden: Only admins can view feedback." },
+      { error: "Forbidden: Only officers and admins can view feedback." },
       { status: 403 },
     );
   }

@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -23,7 +23,7 @@ model Application {
   citizenId       String?
   schemeId        String
   schemeTitle     String
-  profileSnapshot String   // JSON string
+  profileSnapshot String // JSON string
   status          String
   rejectionReason String?
   submittedAt     DateTime @default(now())
@@ -62,4 +62,36 @@ model GrievanceRecord {
   details     String
   status      String   @default("pending")
   receivedAt  DateTime @default(now())
+}
+
+model Scheme {
+  id                String   @id @default(uuid())
+  code              String   @unique
+  title             String
+  category          String
+  level             String
+  ministry          String
+  rulesAST          String
+  numericLimits     String
+  fallbackSchemeIds String
+  sourceCitation    String
+  lastReviewedAt    DateTime
+}
+
+model RetentionLog {
+  id                            String   @id @default(uuid())
+  ranAt                         DateTime @default(now())
+  applicationsDeleted           Int
+  consentRecordsMarkedWithdrawn Int
+}
+
+model SchemeDraft {
+  id               String    @id @default(uuid())
+  targetSchemeCode String?
+  payload          String    // JSON string containing full proposed Scheme shape
+  status           String    @default("draft") // 'draft', 'published', 'discarded'
+  createdBy        String
+  createdAt        DateTime  @default(now())
+  publishedBy      String?
+  publishedAt      DateTime?
 }

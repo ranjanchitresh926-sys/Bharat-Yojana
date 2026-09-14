@@ -1,18 +1,14 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Noto_Sans } from "next/font/google";
 import "./globals.css";
 import SWRegister from "../components/SWRegister";
 import LanguageSelector from "../components/LanguageSelector";
 import { TranslationProvider } from "../components/TranslationProvider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+const notoSans = Noto_Sans({
+  variable: "--font-noto-sans",
+  subsets: ["latin", "devanagari", "bengali", "tamil", "telugu"],
+  weight: ["400", "500", "600", "700", "800", "900"],
 });
 
 export const metadata: Metadata = {
@@ -28,9 +24,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${notoSans.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col font-sans">
         <SWRegister />
         <TranslationProvider>
           {/* Mounted globally (not per-page) so the "अ / A" language button in
@@ -40,7 +36,10 @@ export default function RootLayout({
           <LanguageSelector />
           {children}
         </TranslationProvider>
-      </body>
+      {/* impeccable-live-start */}
+<script src="http://localhost:8400/live.js?token=f7418cfb-9b35-441c-9c67-a717d9ca034a"></script>
+{/* impeccable-live-end */}
+</body>
     </html>
   );
 }

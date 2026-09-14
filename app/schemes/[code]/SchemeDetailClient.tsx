@@ -7,10 +7,12 @@ import GovFooter from '../../../components/GovFooter';
 import { AlertTriangle, ArrowLeft, ArrowRight, Building2, CheckCircle2, TrendingUp, Flag } from 'lucide-react';
 import TrackInterestButton from '../../../components/TrackInterestButton';
 import { useTranslation } from '../../../components/TranslationProvider';
+import { SchemeEngine } from '../../../lib/astEvaluator';
 import { schemeTranslations } from '../../../lib/schemeTranslations';
 
 export default function SchemeDetailClient({ scheme, rulesText, fallbackSchemes }: { scheme: any, rulesText: string, fallbackSchemes: any[] }) {
   const { lang } = useTranslation();
+  const translatedRulesText = SchemeEngine.astToText(scheme.rulesAST, lang as any);
   const translatedTitle = schemeTranslations[lang as keyof typeof schemeTranslations]?.[scheme.code] || scheme.title;
 
   return (
@@ -50,7 +52,7 @@ export default function SchemeDetailClient({ scheme, rulesText, fallbackSchemes 
                   <CheckCircle2 className="text-green-600" /> Eligibility Criteria
                 </h2>
                 <div className="bg-gray-50 p-5 rounded-md border border-gray-200 text-gray-800 leading-relaxed font-medium whitespace-pre-wrap">
-                  {rulesText}
+                  {translatedRulesText}
                 </div>
               </section>
 

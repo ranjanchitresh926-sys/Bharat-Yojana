@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { auth } from "../../../../auth";
-import { SCHEME_DB } from "../../../../lib/seedData";
 import { prisma } from "../../../../lib/prisma";
 
 export async function GET(req: Request) {
@@ -14,15 +13,19 @@ export async function GET(req: Request) {
     );
   }
 
-  const applications = await prisma.application.findMany();
-  const reports = await prisma.report.findMany();
+  const [applications, reports, grievances, allSchemes] = await Promise.all([
+    prisma.application.findMany(),
+    prisma.report.findMany(),
+    prisma.grievanceRecord.findMany(),
+    prisma.scheme.findMany(),
+  ]);
 
   const statusCounts: Record<string, number> = {
     Submitted: 0,
     "Under Review": 0,
     Verified: 0,
     Approved: 0,
-    Rejected: 0
+    Rejected: 0,
   };
 
   const schemeCodeCounts: Record<string, number> = {};
@@ -36,41 +39,44 @@ export async function GET(req: Request) {
 
   const applicationsByStatus = Object.entries(statusCounts).map(([name, count]) => ({
     name,
-    count
+    count,
   }));
 
-  const applicationsByScheme = Object.entries(schemeCodeCounts).map(([name, count]) => ({
-    name,
-    count
-  })).sort((a, b) => b.count - a.count);
+  const applicationsByScheme = Object.entries(schemeCodeCounts)
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count);
 
-  const reportCounts = {
-    pending: 0,
-    resolved: 0
-  };
-
+  const reportCounts = { pending: 0, resolved: 0 };
   reports.forEach((report: { status: string }) => {
-    if (report.status === "pending") {
-      reportCounts.pending++;
-    } else {
-      reportCounts.resolved++;
-    }
+    if (report.status === "pending") reportCounts.pending++;
+    else reportCounts.resolved++;
   });
 
-  const untrackedSchemes = SCHEME_DB
-    .filter(scheme => !schemeCodeCounts[scheme.code])
-    .map(scheme => ({
+  // Aggregate-only: counts of pending/resolved grievances - no raw content ever exposed.
+  const grievanceCounts = { pending: 0, resolved: 0 };
+  grievances.forEach((g: { status: string }) => {
+    if (g.status === "pending") grievanceCounts.pending++;
+    else grievanceCounts.resolved++;
+  });
+
+  const untrackedSchemes = allSchemes
+    .filter((scheme) => !schemeCodeCounts[scheme.code])
+    .map((scheme) => ({
       code: scheme.code,
       title: scheme.title,
-      category: scheme.category
+      category: scheme.category,
     }));
 
-  return NextResponse.json({
-    metrics: {
-      applicationsByStatus,
-      applicationsByScheme,
-      reportCounts,
-      untrackedSchemes
-    }
-  }, { status: 200 });
+  return NextResponse.json(
+    {
+      metrics: {
+        applicationsByStatus,
+        applicationsByScheme,
+        reportCounts,
+        grievanceCounts,
+        untrackedSchemes,
+      },
+    },
+    { status: 200 }
+  );
 }

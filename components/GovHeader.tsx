@@ -127,7 +127,7 @@ export default function GovHeader({ searchQuery = "", onSearchChange }: GovHeade
 
   return (
     <>
-      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-[9999] focus:p-4 focus:bg-white focus:text-blue-900 focus:font-bold focus:shadow-lg top-0 left-0">Skip to main content</a>
+      <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-[9999] focus:p-4 focus:bg-white focus:text-blue-900 focus:font-bold focus:shadow-sm top-0 left-0">Skip to main content</a>
       <header className="print:hidden w-full bg-[#0B3D91] relative z-40 font-sans border-b border-[#093075]">
         {/* Utility Bar */}
         <div className="border-b border-[#1a4fa0]">
@@ -140,7 +140,7 @@ export default function GovHeader({ searchQuery = "", onSearchChange }: GovHeade
               </div>
               <div className="flex flex-col">
                 <span className="text-lg font-extrabold text-white tracking-tight leading-none">Bharat Yojana</span>
-                <span className="text-[10px] font-semibold text-blue-200 uppercase tracking-widest mt-0.5">Student Project — Smart India Hackathon</span>
+                <span className="text-[11px] font-semibold text-blue-200 mt-0.5">Student Project — Smart India Hackathon</span>
               </div>
             </Link>
 
@@ -155,7 +155,7 @@ export default function GovHeader({ searchQuery = "", onSearchChange }: GovHeade
                 }}
                 onKeyDown={handleKeyDown}
                 placeholder={`${t.schemesText} (Press Enter)`}
-                className="w-full pl-11 pr-4 py-2 border border-blue-300/40 rounded-md focus:outline-2 focus:outline-offset-2 focus:outline-white bg-[#0a3580] text-white placeholder-blue-300/60 text-sm transition-all"
+                className="w-full pl-11 pr-4 py-2 rounded-md focus:outline-2 focus:outline-offset-2 focus:outline-white bg-[#0a3580] text-white placeholder-blue-300/60 text-sm transition-all"
               />
               <Search className="absolute left-4 top-2.5 text-blue-300/60 group-focus-within:text-white transition-colors" size={16} />
             </div>
@@ -170,18 +170,18 @@ export default function GovHeader({ searchQuery = "", onSearchChange }: GovHeade
                     <div className="flex items-center gap-3">
                       <div className="flex flex-col text-right">
                         <span className="text-xs text-white font-semibold">{sessionUser.email}</span>
-                        <span className="text-[10px] text-blue-300 uppercase tracking-wider font-bold">{sessionUser.role}</span>
+                        <span className="text-[11px] text-blue-300 font-bold">{sessionUser.role}</span>
                       </div>
                       <button 
                         onClick={handleSignOut}
-                        className="p-1.5 bg-blue-900/50 hover:bg-red-500/80 rounded border border-blue-300/30 text-white transition-colors"
+                        className="p-1.5 bg-blue-900/50 hover:bg-red-500/80 rounded text-white transition-colors"
                         title="Sign Out"
                       >
                         <LogOut size={14} />
                       </button>
                     </div>
                   ) : (
-                    <Link href="/login" className="text-xs font-bold text-white bg-blue-600/50 hover:bg-blue-600 border border-blue-400/50 px-3 py-1.5 rounded transition-colors">
+                    <Link href="/login" className="text-xs font-bold text-white bg-blue-600/50 hover:bg-blue-600 px-3 py-1.5 rounded transition-colors">
                       Sign In
                     </Link>
                   )}
@@ -189,10 +189,10 @@ export default function GovHeader({ searchQuery = "", onSearchChange }: GovHeade
               )}
 
               {/* Font Size Controls */}
-              <div className="flex bg-[#0a3580] rounded border border-blue-300/30 p-0.5">
+              <div className="flex bg-[#0a3580] rounded p-0.5">
                 <button
                   onClick={() => changeFontSize("small")}
-                  className={`px-2 rounded text-[10px] font-bold h-6 flex items-center justify-center text-blue-200 hover:bg-[#1a4fa0] hover:text-white focus:outline-2 focus:outline-offset-2 focus:outline-white ${fontSize === "small" ? "bg-[#1a4fa0] text-white" : ""}`}
+                  className={`px-2 rounded text-[11px] font-bold h-6 flex items-center justify-center text-blue-200 hover:bg-[#1a4fa0] hover:text-white focus:outline-2 focus:outline-offset-2 focus:outline-white ${fontSize === "small" ? "bg-[#1a4fa0] text-white" : ""}`}
                   title="Decrease Text Size"
                   aria-label="Decrease text size"
                 >A-</button>
@@ -214,7 +214,7 @@ export default function GovHeader({ searchQuery = "", onSearchChange }: GovHeade
 
               <button
                 onClick={openLanguageModal}
-                className="flex items-center justify-center px-3 py-1 ml-1 bg-[#0a3580] hover:bg-[#1a4fa0] text-white rounded border border-blue-300/30 transition focus:outline-2 focus:outline-offset-2 focus:outline-white"
+                className="flex items-center justify-center px-3 py-1 ml-1 bg-[#0a3580] hover:bg-[#1a4fa0] text-white rounded transition focus:outline-2 focus:outline-offset-2 focus:outline-white"
                 title="Change Language"
                 aria-label="Change language"
               >
@@ -227,7 +227,7 @@ export default function GovHeader({ searchQuery = "", onSearchChange }: GovHeade
         </div>
 
         {/* Navigation Menu Bar */}
-        <div className="border-t border-[#1a4fa0]">
+        <div className="border-t border-[#1a4fa0] pt-3">
           <div className="max-w-[1400px] mx-auto px-4 lg:px-8 flex gap-0 overflow-x-auto text-sm font-medium text-blue-200">
             {NAV_ITEMS.map((item) => (
               <Link

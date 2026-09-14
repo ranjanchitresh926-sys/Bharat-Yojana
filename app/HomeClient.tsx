@@ -47,6 +47,7 @@ export default function Dashboard() {
   const [langCode, setLangCode] = useState('en-IN');
   const [t, setT] = useState<TranslationSet>(getTranslations('en-IN'));
   const [isLoaded, setIsLoaded] = useState(false);
+  const [showAllEligible, setShowAllEligible] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem('bharat_yojana_state');
@@ -188,7 +189,9 @@ export default function Dashboard() {
   };
 
   const applyPreset = (presetType: string) => {
-    if (presetType === 'Small Farmer MP') {
+    if (presetType === 'Young Student') {
+      setProfile({ ...defaultProfile, occupation: 'Student', age: 12, annualIncome: 100000, state: 'Delhi', gender: 'Male', casteCategory: 'General', isBPLCardHolder: false, isDisabled: false });
+    } else if (presetType === 'Small Farmer MP') {
       setProfile({ ...defaultProfile, occupation: 'Farmer', state: 'Madhya Pradesh', landholdingAcres: 2.5, annualIncome: 40000 });
     } else if (presetType === 'High Income Farmer') {
       setProfile({ ...defaultProfile, occupation: 'Farmer', state: 'Uttar Pradesh', landholdingAcres: 15, annualIncome: 500000 });
@@ -371,7 +374,8 @@ export default function Dashboard() {
                   <span className="flex-1 h-px bg-gray-400"></span>
                 </h3>
                 <div className="flex flex-col gap-2.5">
-                  <button onClick={() => applyPreset('Small Farmer MP')} className="w-full text-left px-4 py-2.5 bg-white border border-[#e2dfd2] hover:border-orange-400 rounded shadow-sm text-sm font-semibold text-gray-700 transition-all">{t.smallFarmerMP}</button>
+                  <button onClick={() => applyPreset('Young Student')} className="w-full text-left px-4 py-2.5 bg-white border border-[#e2dfd2] hover:border-orange-400 rounded shadow-sm text-sm font-semibold text-gray-700 transition-all">🎒 Young Student</button>
+                    <button onClick={() => applyPreset('Small Farmer MP')} className="w-full text-left px-4 py-2.5 bg-white border border-[#e2dfd2] hover:border-orange-400 rounded shadow-sm text-sm font-semibold text-gray-700 transition-all">{t.smallFarmerMP}</button>
                   <button onClick={() => applyPreset('High Income Farmer')} className="w-full text-left px-4 py-2.5 bg-white border border-[#e2dfd2] hover:border-orange-400 rounded shadow-sm text-sm font-semibold text-gray-700 transition-all">{t.highIncomeFarmer}</button>
                   <button onClick={() => applyPreset('BPL Applicant')} className="w-full text-left px-4 py-2.5 bg-white border border-[#e2dfd2] hover:border-orange-400 rounded shadow-sm text-sm font-semibold text-gray-700 transition-all">{t.bplApplicant}</button>
                 </div>
@@ -573,96 +577,206 @@ export default function Dashboard() {
                       </div>
                     </div>
                   )}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {results.map((result, idx) => {
-                  const scheme = schemes.find(s => s.id === result.schemeId)!;
-                  const ministry = scheme.ministry || '';
-                  
-                  return (
-                    <div key={idx} className="bg-white rounded-md p-6 shadow-sm border border-gray-200 flex flex-col h-full transition-shadow relative overflow-hidden">
-                      <div className="flex-1 flex flex-col">
-                        <div className="flex flex-wrap items-center gap-2 mb-4">
-                          <span className="text-[11px] font-bold tracking-widest text-gray-500 uppercase bg-gray-100 px-2.5 py-1 rounded-full">{scheme.category}</span>
-                          <span className="text-[11px] font-bold tracking-widest text-blue-600 uppercase bg-blue-50 px-2.5 py-1 rounded-full">{scheme.level}</span>
-                        </div>
-                        
-                        <h3 className="text-xl font-bold text-gray-900 mb-1 leading-tight">{scheme.title}</h3>
-                        <p className="text-sm text-gray-500 mb-1 font-mono bg-gray-50 inline-block px-2 py-1 rounded border border-gray-100">{scheme.code}</p>
-                        {ministry && <p className="text-xs text-gray-400 mt-1 mb-4">{ministry}</p>}
-                        
-                        <div className="pt-4 mt-2 border-t border-gray-100">
-                          <div className="flex items-center justify-between mb-4">
-                            <span className="text-sm text-gray-500 font-semibold uppercase tracking-wider">{t.status}</span>
-                            {result.isEligible ? (
-                              <span className="flex items-center gap-1.5 bg-green-100 text-green-800 px-3.5 py-1.5 rounded-full text-sm font-bold shadow-sm">
-                                <CheckCircle2 size={16} /> {t.eligible}
-                              </span>
-                            ) : (
-                              <span className="flex items-center gap-1.5 bg-red-100 text-red-800 px-3.5 py-1.5 rounded-full text-sm font-bold shadow-sm">
-                                <XCircle size={16} /> {t.notEligible}
-                              </span>
-                            )}
-                          </div>
+<div className="flex flex-col gap-8">
+                    {(() => {
+                      const eligibleResults = results.filter(r => r.isEligible);
+                      if (eligibleResults.length === 0) return null;
+                      
+                      const topMatchResult = eligibleResults.find(r => {
+                        const s = schemes.find(x => x.id === r.schemeId);
+                        return s?.level === 'Central';
+                      }) || eligibleResults[0];
 
-                          {!result.isEligible && result.quantitativeGaps.length > 0 && (
-                            <div className="bg-red-50/80 rounded-xl p-4 space-y-3 border border-red-100 mb-4">
-                              <h4 className="text-[11px] font-extrabold text-red-800 uppercase tracking-widest flex items-center gap-1.5">
-                                <AlertCircle size={14} /> {t.gapAnalysis}
-                              </h4>
-                              {result.quantitativeGaps.map((gap: any, i: number) => (
-                                <div key={i} className={`text-xs p-3 rounded-lg shadow-sm border ${gap.isCategorical ? 'bg-amber-50 border-amber-200' : 'bg-white border-red-50'}`}>
-                                  <span className="text-gray-800 font-medium block mb-1">{gap.message}</span>
-                                  {gap.actionable && (
-                                    <span className="text-blue-700 font-semibold block mb-2 leading-relaxed bg-blue-50 p-2 rounded">{gap.actionable}</span>
-                                  )}
-                                  {gap.required !== undefined && (
-                                    <div className="flex items-center justify-between font-mono text-[11px] bg-gray-50 p-1.5 rounded">
-                                      <span className="text-gray-600">Actual: {gap.actual}</span>
-                                      <span className="text-green-600 font-bold">Req: {gap.required}</span>
-                                    </div>
-                                  )}
+                      const otherEligible = eligibleResults.filter(r => r.schemeId !== topMatchResult.schemeId);
+                      
+                      return (
+                      <div className="flex flex-col lg:flex-row gap-6 items-start">
+                        {/* Top Match */}
+                        <div className="w-full lg:w-2/3 flex flex-col">
+                          <h3 className="text-xl font-bold text-[#0B3D91] mb-4">Top Match</h3>
+                          {(() => {
+                            const result = topMatchResult;
+                            const scheme = schemes.find(s => s.id === result.schemeId)!;
+                            const ministry = scheme.ministry || '';
+                            return (
+                              <div className="bg-white rounded-md p-6 shadow-sm border border-gray-200 flex flex-col relative">
+                                <div className="flex flex-wrap items-center gap-2 mb-4">
+                                  <span className="text-[11px] font-bold tracking-widest text-gray-500 uppercase bg-gray-100 px-2.5 py-1 rounded-full">{scheme.category}</span>
+                                  <span className="text-[11px] font-bold tracking-widest text-blue-600 uppercase bg-blue-50 px-2.5 py-1 rounded-full">{scheme.level}</span>
+                                  <span className="text-[11px] font-bold tracking-widest text-green-800 uppercase bg-green-100 px-2.5 py-1 rounded-full flex items-center gap-1"><CheckCircle2 size={12}/> Eligible</span>
                                 </div>
-                              ))}
-                            </div>
-                          )}
+                                <h4 className="text-2xl md:text-3xl font-extrabold text-gray-900 mb-2 leading-tight">{scheme.title}</h4>
+                                <p className="text-sm text-gray-500 mb-2 font-mono bg-gray-50 inline-block px-2 py-1 rounded self-start">{scheme.code}</p>
+                                {ministry && <p className="text-sm text-[#4B5563] mt-1 mb-4">{ministry}</p>}
 
-                          {!result.isEligible && result.suggestedFallbacks.length > 0 && (
-                            <div className="pt-1 border-gray-100 mb-4">
-                              <h4 className="text-[11px] font-extrabold text-gray-500 uppercase tracking-widest flex items-center gap-1.5 mb-3">
-                                <TrendingUp size={14} /> {t.alternativeSchemes}
-                              </h4>
-                              <div className="flex flex-wrap gap-2">
-                                {result.suggestedFallbacks.map((fallbackId: string) => {
-                                  const fallbackScheme = schemes.find(s => s.id === fallbackId);
-                                  return fallbackScheme ? (
-                                    <Link key={fallbackId} href={`/schemes/${fallbackScheme.code}`} className="text-xs bg-blue-50 text-blue-700 border border-blue-200 px-3 py-1.5 rounded-full font-bold shadow-sm hover:bg-blue-100 transition-colors cursor-pointer focus:outline-2 focus:outline-offset-2 focus:outline-blue-600">
-                                      {fallbackScheme.code}
-                                    </Link>
-                                  ) : null;
-                                })}
+                                <div className="mt-4 p-4 bg-gray-50 border border-gray-100 rounded-md text-sm text-gray-700 leading-relaxed font-medium">
+                                  <span className="block mb-1 text-xs text-gray-500 uppercase tracking-wider font-bold">Rules Evaluated (Top Match):</span>
+                                  {SchemeEngine.astToText(scheme.rulesAST, langCode as any)}
+                                </div>
+                                
+                                <div className="mt-6 pt-6 border-t border-gray-100 flex flex-col sm:flex-row items-center gap-4">
+                                  <Link href={`/schemes/${scheme.code}`} className="w-full sm:w-auto bg-[#C2410C] hover:bg-[#a3370a] text-white px-6 py-3 rounded-md font-bold text-center shadow-sm transition-colors focus:outline-2 focus:outline-offset-2 focus:outline-orange-800">
+                                    Track My Interest in This Scheme
+                                  </Link>
+                                  <Link href={`/schemes/${scheme.code}`} className="w-full sm:w-auto bg-white hover:bg-gray-50 text-[#0B3D91] border border-gray-300 px-6 py-3 rounded-md font-bold text-center shadow-sm transition-colors focus:outline-2 focus:outline-offset-2 focus:outline-blue-800">
+                                    View Details
+                                  </Link>
+                                </div>
                               </div>
+                            );
+                          })()}
+                        </div>
+
+                        {/* Other Eligible Schemes */}
+                        {otherEligible.length > 0 && (
+                          <div className="w-full lg:w-1/3 flex flex-col">
+                            <h3 className="text-xl font-bold text-[#0B3D91] mb-4">Other Eligible Schemes</h3>
+                            <div className="flex flex-col gap-4">
+                              {(showAllEligible ? otherEligible : otherEligible.slice(0, 4)).map((result, idx) => {
+                                const scheme = schemes.find(s => s.id === result.schemeId)!;
+                                return (
+                                  <div key={idx} className="bg-white rounded-md p-4 shadow-sm border border-gray-200 flex flex-col">
+                                    <div className="flex items-start justify-between mb-2 gap-2">
+                                      <div className="flex items-center flex-wrap gap-1.5">
+                                        <span className="text-[10px] font-bold tracking-widest text-gray-500 uppercase bg-gray-100 px-2 py-0.5 rounded-full">{scheme.category}</span>
+                                        <span className="text-[10px] font-bold tracking-widest text-blue-600 uppercase bg-blue-50 px-2 py-0.5 rounded-full">{scheme.level}</span>
+                                      </div>
+                                      <span className="text-[10px] font-bold text-green-700 uppercase bg-green-50 px-2 py-0.5 rounded-full border border-green-200 shrink-0">Eligible</span>
+                                    </div>
+                                    <h4 className="text-base font-bold text-gray-900 mb-1 leading-tight">{scheme.title}</h4>
+                                    <p className="text-xs text-gray-500 mb-3">{scheme.ministry}</p>
+                                    
+                                    <div className="mt-auto pt-3 border-t border-gray-100 flex items-center justify-between">
+                                      <details className="group relative">
+                                          <summary className="cursor-pointer text-[12px] font-extrabold text-gray-500 uppercase tracking-widest flex items-center gap-1.5 list-none focus:outline-2 focus:outline-offset-2 focus:outline-blue-600">
+                                            <span className="text-[11px] group-open:rotate-90 transition-transform">?</span> Why this result?
+                                          </summary>
+                                          <div className="absolute bottom-full right-0 lg:left-0 mb-2 w-64 z-10 text-sm text-gray-700 bg-white p-4 rounded-lg shadow-xl border border-gray-200 leading-relaxed font-medium hidden group-open:block">
+                                            <span className="block mb-1 text-xs text-gray-500 uppercase tracking-wider font-bold">Rules Evaluated:</span>
+                                            {SchemeEngine.astToText(scheme.rulesAST, langCode as any)}
+                                          </div>
+                                      </details>
+                                      <Link href={`/schemes/${scheme.code}`} className="text-[#0B3D91] font-bold text-sm hover:underline">
+                                        View Details &rarr;
+                                      </Link>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                              
+                              {!showAllEligible && otherEligible.length > 4 && (
+                                <button
+                                  onClick={() => setShowAllEligible(true)}
+                                  className="mt-2 w-full py-3 px-4 bg-blue-50 hover:bg-blue-100 text-blue-800 font-bold text-sm rounded-md border border-blue-200 transition-colors focus:outline-2 focus:outline-offset-2 focus:outline-blue-600 flex items-center justify-center gap-2"
+                                >
+                                  +{otherEligible.length - 4} more eligible schemes
+                                </button>
+                              )}
                             </div>
-                          )}
+                          </div>
+                        )}
+                      </div>
+                      );
+                    })()}
+
+                    {/* Not Eligible Schemes */}
+                    {(() => {
+                      const notEligible = results.filter(r => !r.isEligible);
+                      if (notEligible.length === 0) return null;
+                      return (
+                        <div className="flex flex-col mt-4 pt-8 border-t border-gray-200">
+                          <h3 className="text-xl font-bold text-gray-900 mb-4">Other Schemes (Not Eligible)</h3>
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {notEligible.map((result, idx) => {
+                              const scheme = schemes.find(s => s.id === result.schemeId)!;
+                              const ministry = scheme.ministry || '';
+                              
+                              return (
+                                <div key={idx} className="bg-white rounded-md p-6 shadow-sm border border-gray-200 flex flex-col h-full transition-shadow relative overflow-hidden opacity-80">
+                                  <div className="flex-1 flex flex-col">
+                                    <div className="flex flex-wrap items-center gap-2 mb-4">
+                                      <span className="text-[11px] font-bold tracking-widest text-gray-500 uppercase bg-gray-100 px-2.5 py-1 rounded-full">{scheme.category}</span>
+                                      <span className="text-[11px] font-bold tracking-widest text-blue-600 uppercase bg-blue-50 px-2.5 py-1 rounded-full">{scheme.level}</span>
+                                    </div>
+                                    
+                                    <h3 className="text-xl font-bold text-gray-900 mb-1 leading-tight">{scheme.title}</h3>
+                                    <p className="text-sm text-gray-500 mb-1 font-mono bg-gray-50 inline-block px-2 py-1 rounded">{scheme.code}</p>
+                                    {ministry && <p className="text-xs text-[#4B5563] mt-1 mb-4">{ministry}</p>}
+                                    
+                                    <div className="pt-4 mt-2 border-t border-gray-100">
+                                      <div className="flex items-center justify-between mb-4">
+                                        <span className="text-sm text-gray-500 font-semibold uppercase tracking-wider">{t.status}</span>
+                                        <span className="flex items-center gap-1.5 bg-red-100 text-red-800 px-3.5 py-1.5 rounded-full text-sm font-bold">
+                                          <XCircle size={16} /> {t.notEligible}
+                                        </span>
+                                      </div>
+
+                                      {result.quantitativeGaps.length > 0 && (
+                                        <div className="border-t border-[#E5E7EB] pt-4 mt-4 pl-3 space-y-3">
+                                          <h4 className="text-[11px] font-extrabold text-red-800 flex items-center gap-1.5">
+                                            <AlertCircle size={14} /> {t.gapAnalysis}
+                                          </h4>
+                                          {result.quantitativeGaps.map((gap: any, i: number) => (
+                                            <div key={i} className="pl-2">
+                                              <span className="text-xs text-red-700 font-medium block mb-1">{gap.message}</span>
+                                              {gap.actionable && (
+                                                <span className="text-xs text-blue-700 font-semibold block mb-2 leading-relaxed">{gap.actionable}</span>
+                                              )}
+                                              {gap.required !== undefined && (
+                                                <div className="flex items-center gap-4 font-mono text-[11px] text-[#4B5563]">
+                                                  <span>Actual: {gap.actual}</span>
+                                                  <span className="text-green-700 font-bold">Req: {gap.required}</span>
+                                                </div>
+                                              )}
+                                              {i < result.quantitativeGaps.length - 1 && (
+                                                <hr className="border-t border-[#E5E7EB] mt-3" />
+                                              )}
+                                            </div>
+                                          ))}
+                                        </div>
+                                      )}
+
+                                      {result.suggestedFallbacks.length > 0 && (
+                                        <div className="pt-1 border-gray-100 mb-4">
+                                          <h4 className="text-[11px] font-extrabold text-gray-500 uppercase tracking-widest flex items-center gap-1.5 mb-3">
+                                            <TrendingUp size={14} /> {t.alternativeSchemes}
+                                          </h4>
+                                          <div className="flex flex-wrap gap-2">
+                                            {result.suggestedFallbacks.map((fallbackId: string) => {
+                                              const fallbackScheme = schemes.find(s => s.id === fallbackId);
+                                              return fallbackScheme ? (
+                                                <Link key={fallbackId} href={`/schemes/${fallbackScheme.code}`} className="text-xs bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full font-bold hover:bg-blue-100 transition-colors cursor-pointer focus:outline-2 focus:outline-offset-2 focus:outline-blue-600">
+                                                  {fallbackScheme.code}
+                                                </Link>
+                                              ) : null;
+                                            })}
+                                          </div>
+                                        </div>
+                                      )}
+                                    </div>
+                                    <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+                                      <details className="group relative">
+                                          <summary className="cursor-pointer text-[12px] font-extrabold text-gray-500 uppercase tracking-widest flex items-center gap-1.5 list-none focus:outline-2 focus:outline-offset-2 focus:outline-blue-600">
+                                            <span className="text-[11px] group-open:rotate-90 transition-transform">?</span> Why this result?
+                                          </summary>
+                                          <div className="absolute bottom-full left-0 mb-2 w-64 z-10 text-sm text-gray-700 bg-white p-4 rounded-lg shadow-xl border border-gray-200 leading-relaxed font-medium hidden group-open:block">
+                                            <span className="block mb-1 text-xs text-gray-500 uppercase tracking-wider font-bold">Rules Evaluated:</span>
+                                            {SchemeEngine.astToText(scheme.rulesAST, langCode as any)}
+                                          </div>
+                                      </details>
+                                      <Link href={`/schemes/${scheme.code}`} className="text-[#0B3D91] font-bold text-sm hover:underline flex items-center gap-1 focus:outline-2 focus:outline-offset-2 focus:outline-blue-600 rounded">
+                                        View Scheme &rarr;
+                                      </Link>
+                                    </div>
+                                  </div>             
+                                </div>
+                              );
+                            })}
+                          </div>
                         </div>
-                        <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
-                          <details className="group relative">
-                              <summary className="cursor-pointer text-[12px] font-extrabold text-gray-500 uppercase tracking-widest flex items-center gap-1.5 list-none focus:outline-2 focus:outline-offset-2 focus:outline-blue-600">
-                                <span className="text-[10px] group-open:rotate-90 transition-transform">?</span> Why this result?
-                              </summary>
-                              <div className="absolute bottom-full left-0 mb-2 w-64 z-10 text-sm text-gray-700 bg-white p-4 rounded-lg shadow-xl border border-gray-200 leading-relaxed font-medium hidden group-open:block">
-                                <span className="block mb-1 text-xs text-gray-500 uppercase tracking-wider font-bold">Rules Evaluated:</span>
-                                {SchemeEngine.astToText(scheme.rulesAST)}
-                              </div>
-                          </details>
-                          <Link href={`/schemes/${scheme.code}`} className="text-[#0B3D91] font-bold text-sm hover:underline flex items-center gap-1 focus:outline-2 focus:outline-offset-2 focus:outline-blue-600 rounded">
-                            View Scheme &rarr;
-                          </Link>
-                        </div>
-                      </div>             
-                    </div>
-                  );
-                  })}
-                </div>
+                      );
+                    })()}
+                  </div>
                 </>
               )}
             </section>

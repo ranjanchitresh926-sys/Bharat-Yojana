@@ -23,10 +23,11 @@ function resolveCategoryLimit(
   return limit[category] ?? limit.default;
 }
 
-import { TranslationSet } from './translations';
+import { TranslationSet, LangCode } from './translations';
+import { FIELD_LABELS, RULE_CONNECTORS } from './ruleTranslations';
 
 export class SchemeEngine {
-  static astToText(ast: any): string {
+  static astToText(ast: any, lang: LangCode = 'en-IN'): string {
     if (!ast || typeof ast !== 'object') return String(ast);
 
     const keys = Object.keys(ast);
@@ -35,47 +36,44 @@ export class SchemeEngine {
     const op = keys[0];
     const args = ast[op];
 
+    const fields = FIELD_LABELS[lang] || FIELD_LABELS['en-IN'];
+    const connectors = RULE_CONNECTORS[lang] || RULE_CONNECTORS['en-IN'];
+
     if (op === '==' && Array.isArray(args) && args[0] === 1 && args[1] === 1) {
-      return 'No specific categorical conditions apply';
+      return connectors.noConditions;
     }
 
     if (op === 'and' && Array.isArray(args)) {
-      return '(' + args.map(a => SchemeEngine.astToText(a)).join(' AND ') + ')';
+      return '(' + args.map(a => SchemeEngine.astToText(a, lang)).join(` ${connectors.and} `) + ')';
     }
 
     if (op === 'or' && Array.isArray(args)) {
-      return '(' + args.map(a => SchemeEngine.astToText(a)).join(' OR ') + ')';
+      return '(' + args.map(a => SchemeEngine.astToText(a, lang)).join(` ${connectors.or} `) + ')';
     }
 
     if (Array.isArray(args) && args.length >= 2 && args[0]?.var) {
-      let field = args[0].var;
-      if (field === 'occupation') field = 'Occupation';
-      else if (field === 'state') field = 'State';
-      else if (field === 'isBPLCardHolder') field = 'BPL Status';
-      else if (field === 'isDisabled') field = 'Disability Status';
-      else if (field === 'casteCategory') field = 'Caste';
-      else if (field === 'gender') field = 'Gender';
-      else if (field === 'age') field = 'Age';
+      let fieldRaw = args[0].var;
+      let field = fields[fieldRaw] || fieldRaw;
 
       let val = args[1];
       if (val === true) val = 'Yes';
       else if (val === false) val = 'No';
       else if (val === '') val = 'empty';
-      else if (Array.isArray(val)) val = val.join(' or ');
+      else if (Array.isArray(val)) val = val.join(` ${connectors.or} `);
 
-      if (op === '==') return `${field} must be ${val}`;
-      if (op === '!=') return `${field} must not be ${val}`;
-      if (op === 'in') return `${field} must be ${val}`;
-      if (op === '>=') return `${field} must be at least ${val}`;
-      if (op === '<=') return `${field} must be at most ${val}`;
-      if (op === '>') return `${field} must be greater than ${val}`;
-      if (op === '<') return `${field} must be less than ${val}`;
+      if (op === '==') return `${field} ${connectors.mustBe} ${val}`;
+      if (op === '!=') return `${field} ${connectors.mustBe} not ${val}`;
+      if (op === 'in') return `${field} ${connectors.mustBe} ${val}`;
+      if (op === '>=') return `${field} ${connectors.mustBe} ${connectors.atLeast} ${val}`;
+      if (op === '<=') return `${field} ${connectors.mustBe} ${connectors.atMost} ${val}`;
+      if (op === '>') return `${field} ${connectors.mustBe} > ${val}`;
+      if (op === '<') return `${field} ${connectors.mustBe} < ${val}`;
     }
 
     return JSON.stringify(ast);
   }
 
-  static evaluate(profile: CitizenProfile, scheme: Scheme, allSchemes: Scheme[] = [], t?: TranslationSet): EligibilityResult {
+  static evaluate(profile: CitizenProfile, scheme: Scheme, allSchemes: Scheme[] = [], t?: TranslationSet, lang: LangCode = 'en-IN'): EligibilityResult {
     const gaps: QuantitativeGap[] = [];
 
     // Helper to format fallback text
@@ -155,10 +153,10 @@ export class SchemeEngine {
     // a numeric "gap" (e.g. income) as the reason when the real blocker is
     // categorical (e.g. being a non-resident of a state-only scheme).
     if (astResult !== true) {
-      const reasonText = SchemeEngine.astToText(scheme.rulesAST);
+      const reasonText = SchemeEngine.astToText(scheme.rulesAST, lang);
       if (reasonText !== 'No specific categorical conditions apply') {
         gaps.unshift({
-          message: `Does not meet eligibility criteria: ${reasonText}`,
+          message: `${RULE_CONNECTORS[lang]?.notMet || RULE_CONNECTORS['en-IN'].notMet}: ${reasonText}`,
           isCategorical: true,
         });
       }

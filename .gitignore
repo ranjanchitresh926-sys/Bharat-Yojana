@@ -30,8 +30,10 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# env files
+.env
+.env.*
+!.env.example
 
 # vercel
 .vercel
@@ -40,9 +42,28 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# generated prisma
 /lib/generated/prisma
 
-# database — contains bcrypt hashes and citizen application data, never commit
+# database — contains hashes and local application data
 *.db
 *.db-journal
+*.sqlite
+*.sqlite3
 prisma/dev.db
+
+# archived scripts
+/scripts/archive/
+
+# AI agent and editor configurations
+.claude/
+.windsurf/
+.agents/
+.impeccable/
+.cursor/
+.cursorrules
+
+# AI agent instruction files
+AGENTS.md
+CLAUDE.md
+skills-lock.json

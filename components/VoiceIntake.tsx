@@ -148,9 +148,9 @@ export default function VoiceIntake({ onProfileParsed, speakLabel, listeningLabe
   };
 
   return (
-    <div className="flex flex-col items-center bg-white p-8 rounded-xl border border-[#e2dfd2] relative shadow-sm w-full">
+    <div className="flex flex-col items-center bg-white p-8 rounded-md border border-[#e2dfd2] relative shadow-sm w-full">
       <div className="absolute top-4 left-4">
-        <span className="text-[10px] uppercase font-bold tracking-wider bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full border border-gray-200 shadow-sm">
+        <span className="text-[11px] font-bold bg-gray-100 text-gray-600 px-3 py-1.5 rounded-full">
           {langName}
         </span>
       </div>
@@ -159,8 +159,8 @@ export default function VoiceIntake({ onProfileParsed, speakLabel, listeningLabe
         onClick={toggleRecording}
         className={`p-6 rounded-full transition-all duration-300 mt-4 focus:outline-2 focus:outline-offset-2 focus:outline-blue-800 ${
           isRecording
-            ? 'bg-red-500 text-white animate-pulse shadow-[0_0_20px_rgba(239,68,68,0.4)] scale-110'
-            : 'bg-blue-600 text-white hover:bg-blue-700 hover:scale-105 hover:shadow-md'
+            ? 'bg-red-500 text-white animate-pulse'
+            : 'bg-blue-600 text-white hover:bg-blue-700 hover:scale-105'
         }`}
       >
         {isRecording ? <MicOff size={36} /> : <Mic size={36} />}

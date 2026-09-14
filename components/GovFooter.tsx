@@ -36,10 +36,10 @@ const EXTERNAL_LINKS: Record<string, ExternalService[]> = {
 
 export default function GovFooter() {
   return (
-    <footer className="print:hidden w-full bg-white border-t border-gray-200 mt-16 font-sans">
+    <footer className="print:hidden w-full mt-16 font-sans border-t border-gray-200">
       {/* Related Government Services */}
       <div className="max-w-[1400px] mx-auto px-4 lg:px-8 py-10">
-        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-6">Related Government Services (external)</h3>
+        <h3 className="text-xs font-bold text-[#4B5563] mb-6">Related Government Services (external)</h3>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
           {Object.entries(EXTERNAL_LINKS).map(([category, links]) => (
             <div key={category}>
@@ -65,9 +65,9 @@ export default function GovFooter() {
       </div>
 
       {/* Honest Disclaimer */}
-      <div className="border-t border-gray-200 bg-gray-50">
+      <div className="border-t border-gray-200 pt-3">
         <div className="max-w-[1400px] mx-auto px-4 lg:px-8 py-5">
-          <p className="text-center text-sm text-gray-500">
+          <p className="text-center text-sm text-gray-500 max-w-[65ch] mx-auto">
             A student project built for Smart India Hackathon — not affiliated with the Government of India.
           </p>
         </div>

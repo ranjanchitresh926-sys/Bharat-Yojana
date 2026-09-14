@@ -142,6 +142,13 @@ export async function PATCH(req: Request) {
 
   if (!existingApp) return NextResponse.json({ error: "Application not found" }, { status: 404 });
 
+  // ENFORCE INVARIANT: Terminal states (Approved/Rejected) cannot be modified.
+  // This ensures updatedAt strictly represents the time it entered the final state,
+  // which the 30-day retention purge relies on.
+  if (existingApp.status === "Approved" || existingApp.status === "Rejected") {
+    return NextResponse.json({ error: "Cannot modify an application that is already in a final state (Approved or Rejected)." }, { status: 400 });
+  }
+
   const updateData: any = {};
   if (status) {
     const validStatuses: ApplicationStatus[] = ["Submitted", "Under Review", "Verified", "Approved", "Rejected"];

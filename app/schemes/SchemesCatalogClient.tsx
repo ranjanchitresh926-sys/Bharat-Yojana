@@ -4,12 +4,12 @@ import React from 'react';
 import Link from 'next/link';
 import GovHeader from '../../components/GovHeader';
 import GovFooter from '../../components/GovFooter';
-import { SCHEME_DB } from '../../lib/seedData';
-import { Landmark, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { useTranslation } from '../../components/TranslationProvider';
 import { schemeTranslations } from '../../lib/schemeTranslations';
+import type { Scheme } from '../../types/scheme';
 
-export default function SchemesCatalogClient() {
+export default function SchemesCatalogClient({ schemes }: { schemes: Scheme[] }) {
   const { t, lang } = useTranslation();
   
   return (
@@ -23,7 +23,7 @@ export default function SchemesCatalogClient() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {SCHEME_DB.map((scheme) => {
+          {schemes.map((scheme) => {
             const translatedTitle = schemeTranslations[lang as keyof typeof schemeTranslations]?.[scheme.code] || scheme.title;
             
             return (
