@@ -50,7 +50,7 @@ export async function POST(req: Request) {
     receivedAt: dbReport.receivedAt.toISOString(),
   };
 
-  console.log("[reports] New report added:", sanitized);
+
 
   return NextResponse.json(
     { success: true, message: "Report submitted. Thank you for helping improve our data." },

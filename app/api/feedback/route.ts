@@ -53,7 +53,7 @@ export async function POST(req: Request) {
     },
   });
 
-  console.log("[feedback] New feedback stored:", dbFeedback.id);
+
 
   return NextResponse.json(
     { success: true, message: "Feedback received. Thank you!" },
